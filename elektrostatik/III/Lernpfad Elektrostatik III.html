@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lernpfad Elektrostatik III</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#eef3f8; --card:#ffffff; --ink:#15263a; --muted:#56687b; --line:#d3dde8;
+  --navy:#1a3a5c; --orange:#e36f1b; --orange-soft:#fde9d9;
+  --minus:#2f6fd6; --plus:#d23f36; --water:#5fb3e8; --water-2:#b9e0f7;
+  --ok:#1d8150; --ok-soft:#dff3e8; --bad:#b8332b; --bad-soft:#fbe3e1;
+  --rod:#3a3f47; --glass:#9fc4cf;
+  --head:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Verdana","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0e1a27; --card:#152538; --ink:#e7eef6; --muted:#9db0c3; --line:#28405a;
+    --navy:#a9cdf2; --orange:#f39149; --orange-soft:#3a2716;
+    --minus:#6fa2ff; --plus:#ff7a6e; --water:#5fb3e8; --water-2:#23506d;
+    --ok:#5fd394; --ok-soft:#153b29; --bad:#ff8a80; --bad-soft:#3d1c1a;
+    --rod:#b8c0cb; --glass:#6f9eaa;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0e1a27; --card:#152538; --ink:#e7eef6; --muted:#9db0c3; --line:#28405a;
+  --navy:#a9cdf2; --orange:#f39149; --orange-soft:#3a2716;
+  --minus:#6fa2ff; --plus:#ff7a6e; --water:#5fb3e8; --water-2:#23506d;
+  --ok:#5fd394; --ok-soft:#153b29; --bad:#ff8a80; --bad-soft:#3d1c1a;
+  --rod:#b8c0cb; --glass:#6f9eaa;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:1.075rem;line-height:1.55;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px;border-radius:6px}
+
+/* Kopf */
+.top{max-width:1080px;margin:0 auto;padding:1.4rem 1.25rem .6rem;display:flex;gap:1rem;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.top .kicker{color:var(--orange);font-weight:700;font-size:.95rem;margin:0 0 .15rem}
+.top h1{font-family:var(--head);font-weight:800;font-size:clamp(2rem,5vw,3.1rem);line-height:1;margin:0;color:var(--navy);letter-spacing:-.01em}
+.top .sub{margin:.35rem 0 0;color:var(--muted)}
+.tools{display:flex;gap:.5rem;align-items:center}
+.ghost{background:none;border:1.5px solid var(--line);border-radius:999px;padding:.35rem .85rem;cursor:pointer;color:var(--muted);font-size:.9rem}
+.ghost:hover{border-color:var(--muted);color:var(--ink)}
+
+/* Pfad */
+.pathwrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.path{max-width:1080px;margin:0 auto;padding:.7rem 1.25rem .8rem;display:flex;gap:0;overflow-x:auto;scrollbar-width:thin}
+.stop{flex:1 0 92px;display:flex;flex-direction:column;align-items:center;gap:.3rem;background:none;border:0;cursor:pointer;padding:.2rem .1rem;position:relative;color:var(--muted);font-size:.8rem;line-height:1.2;text-align:center}
+.stop::before{content:"";position:absolute;top:1.05rem;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.stop:first-child::before{display:none}
+.stop.done::before,.stop.done+.stop::before{background:var(--orange)}
+.dot{position:relative;z-index:1;width:2.1rem;height:2.1rem;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--card);border:2.5px solid var(--line);color:var(--muted);font-size:.95rem;transition:transform .2s}
+.stop.done .dot{background:var(--orange);border-color:var(--orange);color:#fff}
+.stop.current .dot{border-color:var(--navy);color:var(--navy);transform:scale(1.15)}
+.stop.current.done .dot{color:#fff;border-color:var(--navy)}
+.stop.current{color:var(--ink);font-weight:700}
+
+/* Station */
+main{max-width:1080px;margin:0 auto;padding:1.5rem 1.25rem 3rem}
+.station{max-width:760px;margin:0 auto}
+.station h2{font-family:var(--head);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.2rem);line-height:1.1;margin:.2rem 0 .6rem;color:var(--navy)}
+.station .num{color:var(--orange);font-weight:700;font-size:.95rem}
+.lead{font-size:1.15rem}
+.station p{margin:.6rem 0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem;margin:1.1rem 0}
+.panel h3{font-family:var(--head);font-weight:600;font-size:1.2rem;margin:0 0 .5rem;color:var(--navy)}
+.note{border-left:4px solid var(--orange);background:var(--orange-soft);padding:.7rem 1rem;border-radius:0 10px 10px 0;margin:1rem 0}
+details.pro{border:1.5px dashed var(--orange);border-radius:12px;padding:.6rem 1rem;margin:1rem 0}
+details.pro summary{cursor:pointer;font-weight:700;color:var(--orange)}
+.key{font-weight:700;color:var(--navy)}
+.m{color:var(--minus);font-weight:700}.p{color:var(--plus);font-weight:700}
+
+/* Aufgaben */
+.q{margin:1rem 0 0}
+.q .prompt{font-weight:700;margin:0 0 .5rem}
+.opts{display:grid;gap:.45rem}
+.opt{text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:.6rem .85rem;cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--navy)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);text-decoration:line-through;opacity:.8}
+.opt:disabled{cursor:default}
+.fb{margin:.55rem 0 0;padding:.55rem .8rem;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);color:var(--ink);border-left:4px solid var(--ok)}
+.fb.no{background:var(--bad-soft);color:var(--ink);border-left:4px solid var(--bad)}
+.btn{background:var(--navy);color:var(--card);border:0;border-radius:10px;padding:.6rem 1.1rem;font-weight:700;cursor:pointer}
+.btn.orange{background:var(--orange);color:#fff}
+.btn.soft{background:var(--paper);color:var(--ink);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.nav{display:flex;justify-content:space-between;gap:1rem;margin-top:2rem;flex-wrap:wrap}
+.status{font-size:.95rem;color:var(--muted)}
+.status.done{color:var(--ok);font-weight:700}
+
+/* Simulation */
+.sim{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1rem;align-items:center}
+@media (max-width:640px){.sim{grid-template-columns:1fr}}
+.sim svg{width:100%;height:auto;display:block;background:var(--paper);border-radius:12px}
+.ctrl label{display:block;font-weight:700;margin:.8rem 0 .25rem}
+.ctrl input[type=range]{width:100%;accent-color:var(--orange)}
+.meter{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--orange);transition:width .12s}
+.flow{stroke-dasharray:6 14;animation:flow .5s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.mol{transition:transform .9s cubic-bezier(.4,.1,.2,1)}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{background:var(--card);border:0;padding:.5rem .8rem;cursor:pointer;border-right:1.5px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--navy);color:var(--card);font-weight:700}
+
+/* Sortieren */
+.sort{display:grid;gap:.5rem}
+.sortitem{display:flex;justify-content:space-between;align-items:center;gap:.7rem;flex-wrap:wrap;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:.5rem .7rem}
+.sortitem.right{border-color:var(--ok);background:var(--ok-soft)}
+.sortitem.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.sortitem .why{flex-basis:100%;font-size:.93rem;color:var(--muted);display:none}
+.sortitem.right .why{display:block}
+
+/* Gecko-Zoom */
+.zoom svg{width:100%;height:auto;display:block;border-radius:12px;background:var(--paper)}
+.zsteps{display:flex;gap:.4rem;flex-wrap:wrap;margin:.7rem 0}
+.zsteps button{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:.35rem .8rem;cursor:pointer;font-size:.92rem}
+.zsteps button.seen{border-color:var(--orange)}
+.zsteps button[aria-current=true]{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:700}
+.scale{font-weight:700;color:var(--orange)}
+
+/* Rechnen */
+.calc{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:.5rem 0}
+.calc input{width:8.5rem;padding:.5rem .6rem;border:1.5px solid var(--line);border-radius:8px;background:var(--paper)}
+.calc input.right{border-color:var(--ok);background:var(--ok-soft)}
+.calc input.wrong{border-color:var(--bad);background:var(--bad-soft)}
+select{padding:.45rem .6rem;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);max-width:100%}
+select.right{border-color:var(--ok);background:var(--ok-soft)}
+select.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.match{display:grid;gap:.8rem}
+.match .it{display:grid;gap:.3rem}
+textarea{width:100%;min-height:6rem;border:1.5px solid var(--line);border-radius:10px;padding:.6rem;background:var(--paper)}
+
+/* Urkunde */
+.cert{border:3px solid var(--orange);border-radius:18px;padding:1.5rem;text-align:center;background:var(--card)}
+.cert h3{font-family:var(--head);font-size:1.8rem;color:var(--navy);margin:.2rem 0}
+.learned{text-align:left;margin:1rem auto 0;max-width:34rem;padding-left:1.2rem}
+.learned li{margin:.3rem 0}
+
+@media (prefers-reduced-motion: reduce){
+  .flow{animation:none}.mol{transition:none}.dot{transition:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <p class="kicker">Physik Klasse 9</p>
+    <h1>Elektrostatik III</h1>
+    <p class="sub">Unsichtbare Kräfte: der abgelenkte Wasserstrahl und der Gecko an der Decke</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="reset" type="button">Fortschritt löschen</button>
+  </div>
+</header>
+<nav class="pathwrap" aria-label="Stationen des Lernpfads"><div class="path" id="path"></div></nav>
+<main><section class="station" id="station" aria-live="polite"></section></main>
+
+<script>
+(function(){
+"use strict";
+const KEY="es3-lernpfad-v1";
+let state={solved:{},cur:0,idea:""};
+try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);if(o&&typeof o==="object")state=Object.assign(state,o);}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+
+const $=(sel,el=document)=>el.querySelector(sel);
+function h(tag,attrs,...kids){const el=document.createElement(tag);if(attrs)for(const k in attrs){if(k==="class")el.className=attrs[k];else if(k==="html")el.innerHTML=attrs[k];else if(k.startsWith("on"))el.addEventListener(k.slice(2),attrs[k]);else el.setAttribute(k,attrs[k]);}kids.flat().forEach(c=>{if(c==null)return;el.appendChild(typeof c==="string"?document.createTextNode(c):c);});return el;}
+const NS="http://www.w3.org/2000/svg";
+function s(tag,attrs){const el=document.createElementNS(NS,tag);for(const k in attrs)el.setAttribute(k,attrs[k]);return el;}
+const reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Fortschritt ---------- */
+function isSolved(st,key){return !!(state.solved[st]&&state.solved[st][key]);}
+function solve(st,key){state.solved[st]=state.solved[st]||{};if(!state.solved[st][key]){state.solved[st][key]=true;save();updateStatus();drawPath();}}
+function countSolved(i){const st=STATIONS[i];return Object.keys(state.solved[st.id]||{}).length;}
+function stationDone(i){return countSolved(i)>=STATIONS[i].need;}
+
+/* ---------- Bausteine ---------- */
+function mc(stId,key,{prompt,options,correct,ok,no}){
+  const box=h("div",{class:"q"});
+  box.appendChild(h("p",{class:"prompt",html:prompt}));
+  const opts=h("div",{class:"opts"});const fb=h("p",{class:"fb",role:"status"});
+  const order=options.map((_,i)=>i);
+  for(let j=order.length-1;j>0;j--){const r=Math.floor(Math.random()*(j+1));[order[j],order[r]]=[order[r],order[j]];}
+  order.forEach(i=>{const t=options[i];
+    const b=h("button",{class:"opt",type:"button",html:t});
+    b.addEventListener("click",()=>{
+      if(i===correct){
+        opts.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+        b.classList.add("right");fb.className="fb show ok";fb.innerHTML="<b>Richtig.</b> "+ok;solve(stId,key);
+      }else{b.classList.add("wrong");b.disabled=true;fb.className="fb show no";fb.innerHTML="<b>Noch nicht.</b> "+(Array.isArray(no)?(no[i]||no[0]):no);}
+    });
+    opts.appendChild(b);
+    if(isSolved(stId,key)&&i===correct){b.classList.add("right");}
+  });
+  if(isSolved(stId,key)){opts.querySelectorAll(".opt").forEach(x=>x.disabled=true);fb.className="fb show ok";fb.innerHTML="<b>Richtig.</b> "+ok;}
+  box.append(opts,fb);return box;
+}
+function panel(title,...kids){return h("div",{class:"panel"},title?h("h3",null,title):null,...kids);}
+
+/* ---------- Wasserstrahl-Simulation ---------- */
+function jetSim(opts){
+  opts=opts||{};
+  const wrap=h("div",{class:"sim"});
+  const svg=s("svg",{viewBox:"0 0 400 360",role:"img","aria-label":"Wasserstrahl aus einem Hahn, rechts ein Stab, der näher geschoben werden kann"});
+  // Hahn
+  svg.append(s("rect",{x:110,y:0,width:80,height:14,rx:3,fill:"var(--muted)"}),s("rect",{x:138,y:10,width:24,height:22,rx:3,fill:"var(--muted)"}));
+  const jet=s("path",{fill:"none",stroke:"var(--water)","stroke-width":7,"stroke-linecap":"round"});
+  const jet2=s("path",{fill:"none",stroke:"var(--water-2)","stroke-width":3,"stroke-linecap":"round",class:reduced?"":"flow"});
+  svg.append(jet,jet2);
+  // Becken
+  svg.append(s("path",{d:"M60 340 L60 356 L340 356 L340 340",fill:"none",stroke:"var(--muted)","stroke-width":3}));
+  const rod=s("g",{});
+  const rodBody=s("rect",{x:0,y:-11,width:260,height:22,rx:11,fill:opts.glass?"var(--glass)":"var(--rod)"});
+  rod.appendChild(rodBody);
+  const signs=s("g",{});rod.appendChild(signs);
+  svg.appendChild(rod);
+  const cap=s("text",{x:390,y:60,"text-anchor":"end","font-size":"13",fill:"var(--muted)","font-family":"var(--body)"});
+  svg.appendChild(cap);
+
+  const ctrl=h("div",{class:"ctrl"});
+  let q=0, sign=opts.glass?1:-1, humid=false, maxD=0;
+  const lblD=h("label",{for:"d"+Math.random()},"Abstand Stab–Strahl");
+  const range=h("input",{type:"range",min:18,max:200,value:170,"aria-label":"Abstand des Stabs zum Wasserstrahl"});
+  const meterWrap=h("div",null,h("label",null,"Ladung des Stabs"),h("div",{class:"meter"},h("i")));
+  const rub=h("button",{class:"btn orange",type:"button"},opts.glass?"Glasstab mit Seide reiben":"Kunststoffstab mit Wolltuch reiben");
+  const dis=h("button",{class:"btn soft",type:"button"},"Stab entladen");
+  ctrl.append(h("div",{class:"row"},rub,dis),lblD,range,meterWrap);
+  let swapBtn=null;
+  if(opts.swap){
+    swapBtn=h("div",{class:"seg",role:"group","aria-label":"Stabmaterial"});
+    const b1=h("button",{type:"button","aria-pressed":"true"},"Kunststoff (−)");
+    const b2=h("button",{type:"button","aria-pressed":"false"},"Glas (+)");
+    b1.onclick=()=>{sign=-1;b1.setAttribute("aria-pressed","true");b2.setAttribute("aria-pressed","false");rub.textContent="Kunststoffstab mit Wolltuch reiben";rodBody.setAttribute("fill","var(--rod)");q=0;draw();};
+    b2.onclick=()=>{sign=1;b2.setAttribute("aria-pressed","true");b1.setAttribute("aria-pressed","false");rub.textContent="Glasstab mit Seide reiben";rodBody.setAttribute("fill","var(--glass)");q=0;draw();};
+    swapBtn.append(b1,b2);ctrl.prepend(h("label",null,"Stabmaterial"),swapBtn);
+  }
+  if(opts.humid){
+    const seg=h("div",{class:"seg",role:"group","aria-label":"Luft"});
+    const a=h("button",{type:"button","aria-pressed":"true"},"trockene Luft");
+    const b=h("button",{type:"button","aria-pressed":"false"},"feuchte Luft");
+    a.onclick=()=>{humid=false;a.setAttribute("aria-pressed","true");b.setAttribute("aria-pressed","false");};
+    b.onclick=()=>{humid=true;b.setAttribute("aria-pressed","true");a.setAttribute("aria-pressed","false");};
+    seg.append(a,b);ctrl.append(h("label",null,"Luft im Raum"),seg);
+  }
+  wrap.append(svg,ctrl);
+
+  function draw(){
+    const d=+range.value, x0=150, tip=x0+d;
+    rod.setAttribute("transform",`translate(${tip},190)`);
+    const D=Math.min(78,2300/d)*q;
+    maxD=Math.max(maxD,D);
+    const path=`M${x0} 32 Q${x0} 150 ${x0+D*0.5} 200 T ${x0+D*1.25} 340`;
+    jet.setAttribute("d",path);jet2.setAttribute("d",path);
+    while(signs.firstChild)signs.removeChild(signs.firstChild);
+    if(q>0.04){for(let i=0;i<6;i++){const t=s("text",{x:18+i*26,y:6,"text-anchor":"middle","font-size":"18","font-weight":"700",fill:"#fff","fill-opacity":Math.min(1,q+.15)});t.textContent=sign<0?"−":"+";signs.appendChild(t);}}
+    $("i",meterWrap).style.width=Math.round(q*100)+"%";
+    cap.textContent=q<0.04?"Stab ungeladen":(D>14?"Der Strahl wird zum Stab hin gebogen":"Näher heranschieben!");
+    if(opts.onChange)opts.onChange({q,D,d,sign,humid,maxD});
+  }
+  rub.onclick=()=>{q=1;draw();};
+  dis.onclick=()=>{q=0;draw();};
+  range.addEventListener("input",draw);
+  const timer=setInterval(()=>{if(!document.body.contains(wrap)){clearInterval(timer);return;}if(humid&&q>0){q=Math.max(0,q-0.025);draw();}},100);
+  draw();
+  return wrap;
+}
+
+/* ---------- Dipol-Ansicht ---------- */
+function dipoleView(stId){
+  const wrap=h("div");
+  const svg=s("svg",{viewBox:"0 0 420 250",role:"img","aria-label":"Wassermoleküle im Strahl und ein geladener Stab rechts"});
+  svg.style.width="100%";svg.style.height="auto";svg.style.display="block";svg.style.background="var(--paper)";svg.style.borderRadius="12px";
+  svg.appendChild(s("rect",{x:40,y:10,width:150,height:230,rx:30,fill:"var(--water-2)","fill-opacity":.5}));
+  const mols=[];
+  const rnd=[];for(let i=0;i<12;i++)rnd.push(Math.floor(Math.random()*360));
+  let k=0;
+  for(let r=0;r<4;r++)for(let c=0;c<3;c++){
+    const x=72+c*44+(r%2)*10, y=40+r*55;
+    const g=s("g",{class:"mol"});
+    // H-Atome zeigen bei Drehung 0 nach rechts
+    const a=52*Math.PI/180, L=15;
+    g.append(
+      s("circle",{cx:(L*Math.cos(a)).toFixed(1),cy:(L*Math.sin(a)).toFixed(1),r:7,fill:"var(--plus)","fill-opacity":.85}),
+      s("circle",{cx:(L*Math.cos(a)).toFixed(1),cy:(-L*Math.sin(a)).toFixed(1),r:7,fill:"var(--plus)","fill-opacity":.85}),
+      s("circle",{cx:0,cy:0,r:12,fill:"var(--minus)","fill-opacity":.85})
+    );
+    const t=s("text",{x:-4,y:4,"font-size":"11","font-weight":"700",fill:"#fff"});t.textContent="O";g.appendChild(t);
+    svg.appendChild(g);mols.push({g,x,y,rand:rnd[k++]});
+  }
+  const rod=s("g",{transform:"translate(270,125)"});
+  const body=s("rect",{x:0,y:-14,width:160,height:28,rx:14,fill:"var(--rod)"});
+  const sg=s("g",{});rod.append(body,sg);svg.appendChild(rod);
+  const legend=h("p",{class:"status",html:'<span class="m">●</span> Sauerstoff-Seite: leicht negativ (δ−) &nbsp; <span class="p">●</span> Wasserstoff-Seiten: leicht positiv (δ+)'});
+  const seg=h("div",{class:"seg",role:"group","aria-label":"Ladung des Stabs"});
+  const modes=[["0","ungeladen"],["-","Stab negativ (−)"],["+","Stab positiv (+)"]];
+  const info=h("p",{class:"fb show",style:"border-left:4px solid var(--orange);background:var(--orange-soft)"});
+  const seen={};
+  function set(m){
+    seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===m?"true":"false"));
+    while(sg.firstChild)sg.removeChild(sg.firstChild);
+    body.setAttribute("fill",m==="+"?"var(--glass)":"var(--rod)");
+    if(m!=="0")for(let i=0;i<5;i++){const t=s("text",{x:18+i*28,y:7,"text-anchor":"middle","font-size":"20","font-weight":"700",fill:"#fff"});t.textContent=m==="-"?"−":"+";sg.appendChild(t);}
+    mols.forEach(o=>{
+      let rot=o.rand;
+      if(m==="-")rot=((o.y-125)*0.12);          // H-Seite (+) zum Stab
+      if(m==="+")rot=180+((125-o.y)*0.12);      // O-Seite (−) zum Stab
+      o.g.style.transform=`translate(${o.x}px,${o.y}px) rotate(${rot}deg)`;
+    });
+    info.innerHTML=m==="0"?"Ohne geladenen Stab zeigen die Moleküle in <b>alle Richtungen</b>. Die Kräfte heben sich auf."
+      :m==="-"?"Die Moleküle drehen ihre <span class='p'>+ Seite</span> zum <span class='m'>negativen</span> Stab. Die nahe + Seite wird angezogen, die ferne − Seite abgestoßen. Weil die <b>Anziehung näher dran</b> ist, ist sie stärker: Der Strahl wird <b>angezogen</b>."
+      :"Jetzt drehen die Moleküle ihre <span class='m'>− Seite</span> zum <span class='p'>positiven</span> Stab. Wieder ist die anziehende Seite näher: Der Strahl wird <b>auch angezogen</b>.";
+    seen[m]=true;if(seen["-"]&&seen["+"])solve(stId,"dipolview");
+  }
+  modes.forEach(([m,t])=>{const b=h("button",{type:"button","data-m":m},t);b.onclick=()=>set(m);seg.appendChild(b);});
+  wrap.append(svg,legend,h("div",{class:"row"},seg),info);
+  requestAnimationFrame(()=>set("0"));
+  return wrap;
+}
+
+/* ---------- Gecko-Zoom ---------- */
+function geckoZoom(stId){
+  const levels=[
+    {name:"Geckofuß",scale:"ca. 1 cm",txt:"Ein Tokeh-Gecko läuft kopfüber an der Decke. Seine Zehen sehen glatt aus – aber quer über jede Zehe laufen feine Streifen.",draw:drawFoot},
+    {name:"Haftlamellen",scale:"ca. 1 mm",txt:"Die Streifen heißen <b>Haftlamellen</b>. Sie sind wie Dachziegel übereinandergelegt und mit etwas Unglaublichem besetzt …",draw:drawToe},
+    {name:"Härchen",scale:"ca. 0,1 mm",txt:"Auf jeder Lamelle stehen <b>Tausende feinster Härchen</b> dicht an dicht – an einem Fuß insgesamt Millionen.",draw:drawSetae},
+    {name:"Spateln",scale:"ca. 0,0002 mm",txt:"Jedes Härchen spaltet sich an der Spitze in <b>Hunderte winzige Spateln</b>. Sie kommen der Decke so nahe, dass sich die Teilchen von Fuß und Decke <b>elektrisch anziehen</b> (Van-der-Waals-Kräfte).",draw:drawSpatula}
+  ];
+  const wrap=h("div",{class:"zoom"});
+  const steps=h("div",{class:"zsteps",role:"group","aria-label":"Vergrößerungsstufen"});
+  const holder=h("div");const cap=h("p");
+  const next=h("button",{class:"btn orange",type:"button"},"Weiter hineinzoomen");
+  const seen=new Set();
+  function show(i){
+    seen.add(i);
+    steps.querySelectorAll("button").forEach((b,j)=>{b.setAttribute("aria-current",j===i?"true":"false");if(seen.has(j))b.classList.add("seen");});
+    holder.innerHTML="";const svg=s("svg",{viewBox:"0 0 420 240",role:"img","aria-label":levels[i].name});levels[i].draw(svg);holder.appendChild(svg);
+    cap.innerHTML=`<span class="scale">${levels[i].scale}</span> &nbsp;${levels[i].txt}`;
+    next.disabled=i===levels.length-1;next.onclick=()=>show(i+1);
+    if(seen.size===levels.length)solve(stId,"zoom");
+  }
+  levels.forEach((l,i)=>{const b=h("button",{type:"button"},l.name);b.onclick=()=>show(i);steps.appendChild(b);});
+  wrap.append(steps,holder,cap,next);
+  show(0);return wrap;
+
+  function drawFoot(svg){
+    svg.appendChild(s("rect",{x:0,y:0,width:420,height:22,fill:"var(--line)"}));
+    const cx=210,cy=150;
+    svg.appendChild(s("path",{d:`M${cx-26} 240 Q${cx-30} ${cy+30} ${cx} ${cy+10} Q${cx+30} ${cy+30} ${cx+26} 240 Z`,fill:"#8aa37a"}));
+    svg.appendChild(s("circle",{cx,cy:cy+12,r:30,fill:"#8aa37a"}));
+    [-64,-32,0,32,64].forEach(a=>{
+      const g=s("g",{transform:`translate(${cx},${cy}) rotate(${a})`});
+      g.appendChild(s("rect",{x:-11,y:-108,width:22,height:100,rx:11,fill:"#8aa37a"}));
+      g.appendChild(s("ellipse",{cx:0,cy:-100,rx:17,ry:22,fill:"#9db88c"}));
+      for(let k=0;k<5;k++)g.appendChild(s("path",{d:`M-13 ${-112+k*7} Q0 ${-117+k*7} 13 ${-112+k*7}`,stroke:"#5d7650","stroke-width":1.4,fill:"none"}));
+      svg.appendChild(g);
+    });
+    const r=s("rect",{x:190,y:48,width:40,height:32,fill:"none",stroke:"var(--orange)","stroke-width":2.5,"stroke-dasharray":"5 4"});svg.appendChild(r);
+  }
+  function drawToe(svg){
+    svg.appendChild(s("ellipse",{cx:210,cy:130,rx:185,ry:110,fill:"#9db88c"}));
+    for(let k=0;k<9;k++){const y=45+k*20;svg.appendChild(s("path",{d:`M${60+Math.abs(4-k)*14} ${y} Q210 ${y-22} ${360-Math.abs(4-k)*14} ${y}`,stroke:"#4f6844","stroke-width":5,fill:"none","stroke-linecap":"round"}));}
+    svg.appendChild(s("rect",{x:185,y:100,width:50,height:36,fill:"none",stroke:"var(--orange)","stroke-width":2.5,"stroke-dasharray":"5 4"}));
+  }
+  function drawSetae(svg){
+    svg.appendChild(s("rect",{x:0,y:190,width:420,height:50,fill:"#7f9a70"}));
+    let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
+    for(let i=0;i<70;i++){const x=8+i*6+rnd()*3, top=40+rnd()*25, bend=(rnd()-.5)*18;
+      svg.appendChild(s("path",{d:`M${x} 192 Q${x+bend} ${(192+top)/2} ${x+bend*1.4} ${top}`,stroke:"#5d7650","stroke-width":1.6,fill:"none"}));}
+    svg.appendChild(s("rect",{x:192,y:26,width:34,height:34,fill:"none",stroke:"var(--orange)","stroke-width":2.5,"stroke-dasharray":"5 4"}));
+  }
+  function drawSpatula(svg){
+    // Decke oben
+    svg.appendChild(s("rect",{x:0,y:0,width:420,height:40,fill:"var(--line)"}));
+    const t=s("text",{x:12,y:26,"font-size":"13",fill:"var(--muted)"});t.textContent="Decke";svg.appendChild(t);
+    svg.appendChild(s("path",{d:"M210 240 L210 170",stroke:"#5d7650","stroke-width":8,"stroke-linecap":"round"}));
+    const tips=[70,110,150,190,230,270,310,350];
+    tips.forEach(x=>{
+      svg.appendChild(s("path",{d:`M210 172 Q${(210+x)/2} 120 ${x} 62`,stroke:"#5d7650","stroke-width":2.2,fill:"none"}));
+      svg.appendChild(s("path",{d:`M${x-13} 50 L${x+13} 50 L${x+4} 62 L${x-4} 62 Z`,fill:"#5d7650"}));
+      // Ladungspaare
+      const a=s("text",{x:x-10,y:37,"font-size":"12","font-weight":"700",fill:"var(--plus)"});a.textContent="+";svg.appendChild(a);
+      const b=s("text",{x:x+2,y:37,"font-size":"12","font-weight":"700",fill:"var(--minus)"});b.textContent="−";svg.appendChild(b);
+      const c=s("text",{x:x-10,y:48,"font-size":"11","font-weight":"700",fill:"var(--minus)"});c.textContent="−";svg.appendChild(c);
+      const d=s("text",{x:x+3,y:48,"font-size":"11","font-weight":"700",fill:"var(--plus)"});d.textContent="+";svg.appendChild(d);
+    });
+    const l=s("text",{x:222,y:222,"text-anchor":"start","font-size":"12",fill:"var(--muted)"});l.textContent="ein einzelnes Härchen";svg.appendChild(l);
+  }
+}
+
+/* ---------- Stationen ---------- */
+const STATIONS=[
+{id:"start",short:"Einstieg",title:"Der Trick mit dem Wasserstrahl",need:2,render(el){
+  el.append(
+    h("p",{class:"lead",html:"Ein dünner Wasserstrahl läuft aus dem Hahn. Du reibst einen Kunststoffstab mit einem Wolltuch und hältst ihn neben den Strahl – ohne ihn zu berühren."}),
+    panel("Deine Vermutung",mc("start","guess",{prompt:"Was passiert mit dem Wasserstrahl?",options:["Er wird zum Stab hin gezogen.","Er wird vom Stab weggedrückt.","Nichts – Wasser ist ja nicht geladen."],correct:0,ok:"Gut vermutet. Probiere es unten aus!",no:["","Probiere es unten aus – dann siehst du, ob das stimmt.","Probiere es unten aus – dann siehst du, ob das stimmt."]})),
+  );
+  const status=h("p",{class:"status"});
+  const sim=jetSim({onChange:({maxD})=>{if(maxD>30){status.textContent="Beobachtet: Der Strahl biegt sich deutlich zum Stab.";status.className="status done";solve("start","sim");}}});
+  el.append(panel("Probier es aus",h("p",null,"Reibe den Stab und schiebe ihn dann langsam näher an den Strahl."),sim,status));
+  el.append(h("div",{class:"note",html:"Mache den Versuch auch im Physikraum selbst – mit einem Plastiklineal und dem Wasserhahn klappt das sehr gut."}));
+}},
+{id:"ladung",short:"Plus & Minus",title:"Plus, Minus und Reibung",need:3,render(el){
+  el.append(
+    h("p",{class:"lead",html:"Bevor wir den Strahl erklären können, brauchen wir zwei Grundregeln der Elektrostatik."}),
+    panel("Zwei Regeln",
+      h("p",{html:"<span class='key'>1.</span> Es gibt zwei Arten von Ladung: <span class='p'>positiv (+)</span> und <span class='m'>negativ (−)</span>. <b>Gleichnamige</b> Ladungen stoßen sich ab, <b>ungleichnamige</b> ziehen sich an."}),
+      h("p",{html:"<span class='key'>2.</span> Beim Reiben wandern <b>Elektronen</b> (negativ) von einem Körper zum anderen. Wer Elektronen bekommt, ist danach negativ geladen, wer welche abgibt, positiv."}),
+      h("p",{html:"Und: Je <b>näher</b> sich Ladungen sind, desto <b>stärker</b> ist die Kraft zwischen ihnen."})
+    ),
+    panel("Teste dich",
+      mc("ladung","a",{prompt:"Zwei negativ geladene Luftballons hängen nebeneinander. Was passiert?",options:["Sie ziehen sich an.","Sie stoßen sich ab.","Nichts."],correct:1,ok:"Gleichnamige Ladungen stoßen sich ab.",no:"Schau dir Regel 1 noch einmal an: beide sind negativ."}),
+      mc("ladung","b",{prompt:"Der Kunststoffstab ist nach dem Reiben mit Wolle negativ geladen. Was ist passiert?",options:["Der Stab hat Elektronen vom Tuch bekommen.","Der Stab hat Elektronen an das Tuch abgegeben.","Im Stab sind neue Elektronen entstanden."],correct:0,ok:"Elektronen sind negativ – wer mehr davon hat, ist negativ geladen. Das Tuch ist jetzt positiv.",no:["","Wer Elektronen abgibt, wird positiv – der Stab ist aber negativ.","Ladung entsteht nicht neu, sie wird nur verschoben."]}),
+      mc("ladung","c",{prompt:"Wann ist die Kraft zwischen zwei Ladungen am größten?",options:["Wenn sie weit voneinander entfernt sind.","Wenn sie nah beieinander sind.","Der Abstand spielt keine Rolle."],correct:1,ok:"Das brauchst du gleich, um den Wasserstrahl zu verstehen.",no:"Denk an die Simulation: Wann hat sich der Strahl stärker gebogen?"})
+    )
+  );
+}},
+{id:"dipol",short:"Dipol",title:"Wasser hat zwei Seiten",need:4,render(el){
+  el.append(
+    h("p",{class:"lead",html:"Wasser ist insgesamt <b>nicht geladen</b>. Trotzdem wird es angezogen. Das Geheimnis steckt im Wassermolekül H<sub>2</sub>O."}),
+    h("p",{html:"Das Sauerstoff-Atom zieht die Elektronen etwas stärker zu sich. Dadurch ist die Sauerstoff-Seite leicht <span class='m'>negativ</span>, die beiden Wasserstoff-Seiten sind leicht <span class='p'>positiv</span>. Ein Teilchen mit zwei verschieden geladenen Enden nennt man <span class='key'>Dipol</span>."}),
+    panel("Schau in den Strahl hinein",h("p",null,"Wähle nacheinander einen negativen und einen positiven Stab."),dipoleView("dipol")),
+    panel("Teste dich",
+      mc("dipol","a",{prompt:"Welche Seite drehen die Wassermoleküle zu einem <span class='m'>negativ</span> geladenen Stab?",options:["Die Sauerstoff-Seite (−)","Die Wasserstoff-Seite (+)","Sie drehen sich gar nicht."],correct:1,ok:"Die + Seite wird vom − Stab angezogen und dreht sich zu ihm hin.",no:"Ungleichnamige Ladungen ziehen sich an – welche Seite passt zum − Stab?"}),
+      mc("dipol","b",{prompt:"Das Molekül hat eine angezogene und eine abgestoßene Seite. Warum gewinnt die Anziehung?",options:["Die anziehende Seite ist näher am Stab.","Die Wasserstoff-Seite ist schwerer.","Abstoßung gibt es bei Wasser nicht."],correct:0,ok:"Näher dran heißt stärkere Kraft – deshalb überwiegt die Anziehung.",no:"Erinnere dich an Regel 3: Welche Rolle spielt der Abstand?"}),
+      mc("dipol","c",{prompt:"Was passiert, wenn man statt des Kunststoffstabs einen <span class='p'>positiv</span> geladenen Glasstab nimmt?",options:["Der Strahl wird weggedrückt.","Der Strahl wird ebenfalls angezogen.","Der Strahl bleibt gerade."],correct:1,ok:"Die Moleküle drehen jetzt ihre − Seite zum Stab. Die Anziehung ist wieder näher dran.",no:"Probiere den positiven Stab oben in der Ansicht aus."})
+    ),
+    h("details",{class:"pro"},h("summary",null,"Für Profis: Es gibt noch einen zweiten Grund"),
+      h("p",{html:"Im Wasser sind immer auch ein paar geladene Teilchen (Ionen) gelöst. Der geladene Stab zieht die ungleichnamigen Ionen in den Strahl-Teil, der ihm am nächsten ist, und drückt die gleichnamigen weg. Diese <b>Ladungstrennung durch Influenz</b> sorgt ebenfalls dafür, dass der Strahl angezogen wird."}))
+  );
+}},
+{id:"alltag",short:"Alltag",title:"Elektrostatik im Alltag",need:2,render(el){
+  el.append(h("p",{class:"lead",html:"Dieselben Kräfte begegnen dir ständig. Aber Vorsicht: Nicht alles, was klebt oder zieht, ist elektrisch."}));
+  const items=[
+    ["Ein geriebener Luftballon bleibt an der Wand hängen.",true,"Der geladene Ballon zieht die Teilchen der Wand an."],
+    ["Nach dem Mütze-Ausziehen stehen die Haare ab.",true,"Die Haare sind gleichnamig geladen und stoßen sich ab."],
+    ["Staub sammelt sich auf dem Bildschirm.",true,"Der Bildschirm ist geladen und zieht Staub an."],
+    ["Ein Magnet hält am Kühlschrank.",false,"Das ist Magnetismus, keine elektrische Ladung."],
+    ["Frischhaltefolie klebt an der Hand.",true,"Beim Abreißen von der Rolle lädt sich die Folie auf."],
+    ["Ein Apfel fällt vom Baum.",false,"Das ist die Gewichtskraft (Gravitation)."]
+  ];
+  const list=h("div",{class:"sort"});const res={};
+  items.forEach((it,i)=>{
+    const row=h("div",{class:"sortitem"},h("span",null,it[0]));
+    const seg=h("div",{class:"seg",role:"group"});
+    [["elektrisch",true],["etwas anderes",false]].forEach(([t,v])=>{
+      const b=h("button",{type:"button"},t);
+      b.onclick=()=>{seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed","true");
+        const good=v===it[1];row.classList.toggle("right",good);row.classList.toggle("wrong",!good);res[i]=good;
+        if(items.every((_,k)=>res[k]))solve("alltag","sort");};
+      seg.appendChild(b);
+    });
+    row.append(seg,h("span",{class:"why"},it[2]));list.appendChild(row);
+  });
+  el.append(panel("Elektrisch oder nicht?",list));
+  const st=h("p",{class:"status"});
+  el.append(panel("Profi-Versuch: Wetter spielt mit",
+    h("p",null,"Der Versuch mit dem Wasserstrahl klappt an manchen Tagen schlecht. Stelle „feuchte Luft“ ein, reibe den Stab und beobachte die Ladungsanzeige."),
+    jetSim({humid:true}),
+    mc("alltag","humid",{prompt:"Warum funktioniert der Versuch bei feuchter Luft schlechter?",options:["Die feuchte Luft leitet etwas – die Ladung fließt vom Stab ab.","Der Wasserstrahl wird bei Feuchtigkeit schwerer.","Feuchte Luft stößt den Stab ab."],correct:0,ok:"Der Stab entlädt sich über die feuchte Luft. Deshalb gelingen Elektrostatik-Versuche im Winter bei trockener Heizungsluft besonders gut.",no:"Schau auf die Ladungsanzeige, wenn „feuchte Luft“ eingestellt ist."}),st));
+}},
+{id:"gecko",short:"Gecko",title:"Der Gecko an der Decke",need:4,render(el){
+  el.append(
+    h("p",{class:"lead",html:"Geckos laufen senkrecht an Glasscheiben hoch und kopfüber an der Decke entlang – ohne Kleber und ohne Saugnäpfe. Wie machen sie das?"}),
+    panel("Zoom in den Geckofuß",geckoZoom("gecko")),
+    h("div",{class:"note",html:"Den Film zum Gecko findest du in der <b>IServ-Wolke</b>."}),
+    panel("Teste dich",
+      mc("gecko","a",{prompt:"Welche Kraft hält den Gecko an der Decke?",options:["Elektrische Anziehung zwischen den Teilchen von Fuß und Decke","Ein klebriges Sekret an den Zehen","Unterdruck wie bei einem Saugnapf"],correct:0,ok:"Das sind die Van-der-Waals-Kräfte – wie beim Wasserstrahl ziehen sich + und − an.",no:["","Geckofüße sind trocken und hinterlassen keine Klebespuren.","Geckos haften auch im Vakuum – Saugnäpfe würden dort nicht funktionieren."]}),
+      mc("gecko","b",{prompt:"Warum braucht der Gecko so unglaublich viele Härchen und Spateln?",options:["Jede einzelne Anziehung ist winzig – erst Milliarden zusammen ergeben eine große Kraft.","Die Härchen halten ihn warm.","Damit der Fuß weich ist und nicht wehtut."],correct:0,ok:"Viele winzige Kräfte addieren sich zu einer großen Haftkraft.",no:"Denk daran, wie schwach die Kraft zwischen einzelnen Teilchen ist."}),
+      mc("gecko","c",{prompt:"Die Kraft wirkt nur, wenn Fuß und Decke sich extrem nahe kommen. Wie löst der Gecko also seinen Fuß mühelos?",options:["Er rollt die Zehen ab, sodass sich die Härchen nacheinander lösen.","Er reißt den Fuß mit aller Kraft ab.","Er macht die Decke nass."],correct:0,ok:"Beim Abrollen löst sich immer nur ein kleiner Teil – das kostet kaum Kraft. Wie beim Abziehen von Klebeband.",no:"Wie ziehst du ein Klebeband am leichtesten ab?"})
+    )
+  );
+}},
+{id:"rechnen",short:"Rechnen",title:"Wie stark ist ein Gecko?",need:2,render(el){
+  el.append(h("p",{class:"lead",html:"Ein Tokeh-Gecko wiegt etwa <b>100 g</b>. Seine Füße könnten theoretisch <b>10 kg</b> halten."}));
+  function calc(key,label,unit,accept,hint,okTxt){
+    const inp=h("input",{type:"text",inputmode:"decimal","aria-label":label});
+    const b=h("button",{class:"btn",type:"button"},"Prüfen");
+    const hb=h("button",{class:"btn soft",type:"button"},"Tipp");
+    const fb=h("p",{class:"fb",role:"status"});
+    b.onclick=()=>{const v=parseFloat(inp.value.replace(/\s/g,"").replace(",","."));
+      if(accept(v)){inp.className="right";fb.className="fb show ok";fb.innerHTML="<b>Richtig.</b> "+okTxt;solve("rechnen",key);}
+      else{inp.className="wrong";fb.className="fb show no";fb.innerHTML=isNaN(v)?"Gib eine Zahl ein.":"<b>Noch nicht.</b> Rechne noch einmal nach oder hol dir einen Tipp.";}};
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")b.click();});
+    hb.onclick=()=>{fb.className="fb show";fb.style.borderLeft="4px solid var(--orange)";fb.style.background="var(--orange-soft)";fb.innerHTML=hint;};
+    if(isSolved("rechnen",key)){inp.className="right";fb.className="fb show ok";fb.innerHTML="<b>Richtig.</b> "+okTxt;}
+    return h("div",{class:"q"},h("p",{class:"prompt",html:label}),h("div",{class:"calc"},inp,h("span",null,unit),b,hb),fb);
+  }
+  el.append(panel("Rechne selbst",
+    calc("a","a) Das Wievielfache seines eigenen Gewichts kann der Gecko halten?","-fache",v=>Math.abs(v-100)<0.01,"Teile die Last durch das Gewicht des Geckos. Achtung: 100 g = 0,1 kg.","10 kg : 0,1 kg = 100. Der Gecko hält das <b>100-fache</b> seines Gewichts."),
+    calc("b","b) Du wiegst 50 kg und hättest Geckofüße. Wie viel könntest du halten?","kg",v=>Math.abs(v-5000)<0.5,"Nimm dein Gewicht mal den Faktor aus Teil a).","50 kg · 100 = <b>5000 kg = 5 Tonnen</b> – so viel wie drei Autos.")
+  ));
+}},
+{id:"bionik",short:"Bionik",title:"Vom Gecko lernen",need:2,render(el){
+  el.append(h("p",{class:"lead",html:"Forschende schauen sich Tricks aus der Natur ab und bauen sie technisch nach."}),
+    panel("Wie heißt das?",mc("bionik","a",{prompt:"Wie nennt man die Wissenschaft, die Erfindungen der Natur in die Technik überträgt?",options:["Biochemie","Bionik","Robotik"],correct:1,ok:"<b>Bionik</b> = <b>Bio</b>logie + Tech<b>nik</b>. Ein anderes Beispiel ist der Klettverschluss nach dem Vorbild der Klette.",no:"Das Wort setzt sich aus Biologie und Technik zusammen."})));
+  const pairs=[
+    ["Ein Poster soll halten und sich später ohne Rückstände ablösen lassen.","Gecko-Klebeband"],
+    ["Ein Roboter-Greifer soll im Weltall Satelliten festhalten – Saugnäpfe funktionieren dort nicht.","Trockener Gecko-Greifer"],
+    ["Ein Roboter soll Glasfassaden von Hochhäusern hochklettern.","Kletterroboter mit Gecko-Füßen"]
+  ];
+  const choices=["– wähle –"].concat(pairs.map(p=>p[1]).slice().sort());
+  const box=h("div",{class:"match"});const fb=h("p",{class:"fb",role:"status"});
+  const sels=pairs.map(p=>{const sel=h("select",{"aria-label":p[0]});choices.forEach(c=>sel.appendChild(h("option",null,c)));box.appendChild(h("div",{class:"it"},h("span",null,p[0]),sel));return sel;});
+  const chk=h("button",{class:"btn",type:"button"},"Zuordnung prüfen");
+  chk.onclick=()=>{let all=true;sels.forEach((s_,i)=>{const good=s_.value===pairs[i][1];s_.className=good?"right":"wrong";if(!good)all=false;});
+    if(all){fb.className="fb show ok";fb.innerHTML="<b>Alles richtig.</b> Alle drei Erfindungen gibt es wirklich oder werden gerade entwickelt.";solve("bionik","match");}
+    else{fb.className="fb show no";fb.innerHTML="Rot markierte Zuordnungen passen noch nicht.";}};
+  if(isSolved("bionik","match")){sels.forEach((s_,i)=>{s_.value=pairs[i][1];s_.className="right";});}
+  el.append(panel("Welche Erfindung löst welches Problem?",box,h("div",{class:"row",style:"margin-top:.8rem"},chk),fb));
+  const ta=h("textarea",{placeholder:"Wofür könnte man Gecko-Füße noch gebrauchen? Beschreibe deine Erfindung …","aria-label":"Deine eigene Erfindung"});
+  ta.value=state.idea||"";ta.addEventListener("input",()=>{state.idea=ta.value;save();});
+  el.append(panel("Für Profis: Deine eigene Erfindung",ta,h("p",{class:"status"},"Wird nur auf diesem Gerät gespeichert. Zeichne eine Skizze dazu in dein Heft.")));
+}},
+{id:"check",short:"Abschluss",title:"Abschlusscheck",need:5,render(el){
+  el.append(h("p",{class:"lead",html:"Fünf Fragen quer durch den Lernpfad. Schaffst du alle?"}));
+  el.append(panel(null,
+    mc("check","1",{prompt:"Warum wird ein <b>ungeladener</b> Wasserstrahl von einem geladenen Stab angezogen?",options:["Wassermoleküle sind Dipole und drehen ihre passende Seite zum Stab.","Der Stab macht das Wasser schwerer.","Wasser ist immer negativ geladen."],correct:0,ok:"Die angezogene Seite ist näher dran – die Anziehung überwiegt.",no:"Denk an die zwei Seiten des Wassermoleküls."}),
+    mc("check","2",{prompt:"Welche Aussage ist falsch?",options:["Gleichnamige Ladungen stoßen sich ab.","Beim Reiben entstehen neue Ladungen.","Je kleiner der Abstand, desto größer die Kraft."],correct:1,ok:"Beim Reiben werden Elektronen nur verschoben, nicht erzeugt.",no:"Diese Aussage stimmt. Gesucht ist die falsche."}),
+    mc("check","3",{prompt:"Was haben Wasserstrahl und Gecko gemeinsam?",options:["Bei beiden wirken elektrische Anziehungskräfte zwischen + und −.","Bei beiden wirkt Magnetismus.","Bei beiden wirkt Klebstoff."],correct:0,ok:"Genau das verbindet die beiden Phänomene.",no:"Beide Phänomene haben mit Ladungen zu tun."}),
+    mc("check","4",{prompt:"Der Gecko-Trick funktioniert nur, wenn …",options:["… die Oberfläche nass ist.","… die Spateln der Oberfläche extrem nahe kommen.","… der Gecko sich vorher an einem Wolltuch reibt."],correct:1,ok:"Die Van-der-Waals-Kräfte wirken nur auf winzige Abstände.",no:"Denk an die letzte Zoomstufe."}),
+    mc("check","5",{prompt:"Warum gelingt der Wasserstrahl-Versuch bei trockener Winterluft besonders gut?",options:["Die Ladung kann kaum über die Luft abfließen.","Kaltes Wasser ist stärker geladen.","Im Winter gibt es mehr Elektronen."],correct:0,ok:"Trockene Luft leitet kaum – der Stab bleibt lange geladen.",no:"Erinnere dich an den Profi-Versuch mit der feuchten Luft."})
+  ));
+  const fin=h("div");el.appendChild(fin);
+  function renderCert(){
+    fin.innerHTML="";
+    const all=STATIONS.every((_,i)=>stationDone(i));
+    if(!all){const miss=STATIONS.filter((_,i)=>!stationDone(i)).map(s_=>s_.short).join(", ");fin.appendChild(h("p",{class:"status"},"Noch offen: "+miss));return;}
+    fin.appendChild(h("div",{class:"cert"},h("p",{class:"kicker",style:"color:var(--orange);font-weight:700;margin:0"},"Lernpfad geschafft"),h("h3",null,"Elektrostatik III"),
+      h("p",null,"Das hast du gelernt:"),
+      h("ul",{class:"learned"},
+        h("li",{html:"Gleichnamige Ladungen stoßen sich ab, ungleichnamige ziehen sich an – je näher, desto stärker."}),
+        h("li",{html:"Wassermoleküle sind <b>Dipole</b>. Deshalb wird ein Wasserstrahl von jedem geladenen Stab angezogen."}),
+        h("li",{html:"Feuchte Luft lässt die Ladung abfließen."}),
+        h("li",{html:"Geckos haften mit Millionen Härchen durch <b>Van-der-Waals-Kräfte</b> – elektrische Anziehung auf winzigem Abstand."}),
+        h("li",{html:"<b>Bionik</b> überträgt solche Tricks der Natur in die Technik."})
+      ),h("p",{class:"status"},"Zeige diese Seite deiner Lehrkraft.")));
+  }
+  STATIONS[STATIONS.length-1].onUpdate=renderCert;renderCert();
+}}
+];
+
+/* ---------- Oberfläche ---------- */
+const pathEl=$("#path"), stEl=$("#station");
+let statusEl=null;
+function drawPath(){
+  pathEl.innerHTML="";
+  STATIONS.forEach((st,i)=>{
+    const b=h("button",{type:"button",class:"stop"+(stationDone(i)?" done":"")+(i===state.cur?" current":""),"aria-current":i===state.cur?"step":"false","aria-label":`Station ${i+1}: ${st.title}${stationDone(i)?" (erledigt)":""}`},
+      h("span",{class:"dot"},stationDone(i)?"✓":String(i+1)),h("span",null,st.short));
+    b.onclick=()=>go(i);pathEl.appendChild(b);
+  });
+  const cur=pathEl.children[state.cur];if(cur&&cur.scrollIntoView)cur.scrollIntoView({block:"nearest",inline:"center",behavior:reduced?"auto":"smooth"});
+}
+function updateStatus(){
+  const i=state.cur,st=STATIONS[i];if(!statusEl)return;
+  const n=Math.min(countSolved(i),st.need);
+  statusEl.textContent=stationDone(i)?"Station erledigt":`${n} von ${st.need} Aufgaben gelöst`;
+  statusEl.className="status"+(stationDone(i)?" done":"");
+  if(st.onUpdate)st.onUpdate();
+}
+function go(i){
+  state.cur=Math.max(0,Math.min(STATIONS.length-1,i));save();
+  const st=STATIONS[state.cur];stEl.innerHTML="";
+  stEl.append(h("p",{class:"num"},`Station ${state.cur+1} von ${STATIONS.length}`),h("h2",null,st.title));
+  st.render(stEl);
+  statusEl=h("p",{class:"status"});
+  const prev=h("button",{class:"btn soft",type:"button"},"Zurück");prev.disabled=state.cur===0;prev.onclick=()=>go(state.cur-1);
+  const nxt=h("button",{class:"btn orange",type:"button"},"Nächste Station");nxt.disabled=state.cur===STATIONS.length-1;nxt.onclick=()=>go(state.cur+1);
+  stEl.appendChild(h("div",{class:"nav"},prev,statusEl,nxt));
+  updateStatus();drawPath();
+  window.scrollTo({top:0,behavior:reduced?"auto":"smooth"});
+}
+$("#reset").onclick=()=>{if(confirm("Deinen Fortschritt auf diesem Gerät löschen?")){state={solved:{},cur:0,idea:""};save();go(0);}};
+go(state.cur||0);
+})();
+</script>
+</body>
+</html>
