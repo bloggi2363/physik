@@ -1,0 +1,652 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lernpfad Elektrostatik I</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Layout: eine Spalte mit Stations-Leiste oben, jede Station als Karte mit Versuch/Simulation + Fragen */
+:root{
+  --paper:#eef3f8; --card:#ffffff; --ink:#15263a; --muted:#56687b; --line:#d3dde8;
+  --navy:#1a3a5c; --heading:#1a3a5c; --btn:#1a3a5c; --btn-fg:#ffffff;
+  --orange:#e36f1b; --orange-ink:#b9520c; --orange-soft:#fde9d9;
+  --minus:#2f6fd6; --plus:#d23f36; --water:#cfe9f8; --water-edge:#7fb3d6;
+  --metal:#8a96a3; --metal-dark:#5b6672; --chrome:#e9eef3; --neutral:#a9b4bf;
+  --ok:#1d8150; --ok-soft:#dff3e8; --bad:#b8332b; --bad-soft:#fbe3e1;
+  --glow:#ffd34d; --lamp:#fff6d6; --sim:#f6f9fc;
+  --head:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Verdana","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1a26; --card:#172636; --ink:#e6edf4; --muted:#9fb0c2; --line:#2a3d52;
+  --navy:#9cc3ea; --heading:#cfe2f5; --btn:#2c5a86; --btn-fg:#ffffff;
+  --orange:#f08a3e; --orange-ink:#ffae70; --orange-soft:#3a2516;
+  --minus:#6aa0ff; --plus:#ff7a6e; --water:#1d4a66; --water-edge:#4f88ad;
+  --metal:#6f7d8c; --metal-dark:#9aa7b5; --chrome:#dfe7ef; --neutral:#5e6d7c;
+  --ok:#4cc38a; --ok-soft:#15372a; --bad:#ff8a80; --bad-soft:#3d1d1b;
+  --glow:#ffd34d; --lamp:#2a3646; --sim:#122130; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1a26; --card:#172636; --ink:#e6edf4; --muted:#9fb0c2; --line:#2a3d52;
+  --navy:#9cc3ea; --heading:#cfe2f5; --btn:#2c5a86; --btn-fg:#ffffff;
+  --orange:#f08a3e; --orange-ink:#ffae70; --orange-soft:#3a2516;
+  --minus:#6aa0ff; --plus:#ff7a6e; --water:#1d4a66; --water-edge:#4f88ad;
+  --metal:#6f7d8c; --metal-dark:#9aa7b5; --chrome:#dfe7ef; --neutral:#5e6d7c;
+  --ok:#4cc38a; --ok-soft:#15372a; --bad:#ff8a80; --bad-soft:#3d1d1b;
+  --glow:#ffd34d; --lamp:#2a3646; --sim:#122130; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--head);color:var(--heading);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(1.9rem,5vw,2.6rem);font-weight:800}
+h2{font-size:clamp(1.35rem,3.6vw,1.7rem);font-weight:800}
+h3{font-size:1.08rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--head);font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-ink)}
+.top{display:flex;flex-direction:column;gap:6px}
+.top .lead{color:var(--muted);max-width:62ch}
+/* Stationsleiste */
+.steps{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.step{font:inherit;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.step b{font-family:var(--head);font-size:1.05rem;line-height:1}
+.step span{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.step.cur{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange) inset}
+.step.done{background:var(--ok-soft);border-color:var(--ok)}
+.step.done b::after{content:" ✓";color:var(--ok)}
+@media (max-width:560px){.steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--orange);width:0;transition:width .3s}
+/* Station */
+.station{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px clamp(16px,3vw,28px) 26px;display:flex;flex-direction:column;gap:16px}
+.station header{display:flex;flex-direction:column;gap:4px}
+.task{display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid var(--line)}
+.info{background:var(--orange-soft);border-left:4px solid var(--orange);border-radius:8px;padding:10px 14px}
+.safety{background:var(--bad-soft);border-left:4px solid var(--bad);border-radius:8px;padding:10px 14px}
+details{background:var(--paper);border-radius:10px;padding:10px 14px}
+details summary{cursor:pointer;font-weight:700;color:var(--heading)}
+details[open] summary{margin-bottom:6px}
+/* Fragen */
+.q{display:flex;flex-direction:column;gap:8px}
+.q .prompt{font-weight:700}
+.opts{display:grid;gap:7px}
+.opt{font:inherit;text-align:left;background:var(--paper);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:9px 13px;cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--orange)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);text-decoration:line-through;opacity:.85}
+.opt:disabled{cursor:default}
+.fb{padding:9px 13px;border-radius:8px}
+.fb.ok{background:var(--ok-soft);border-left:4px solid var(--ok)}
+.fb.no{background:var(--bad-soft);border-left:4px solid var(--bad)}
+.chk{display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:9px 13px;cursor:pointer}
+.chk input{width:20px;height:20px;margin-top:2px;accent-color:var(--orange);flex:none}
+.chk.right{background:var(--ok-soft);border-color:var(--ok)}
+.chk.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.sort{display:grid;gap:7px}
+.srow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px 8px 13px}
+.srow > span{flex:1 1 220px;min-width:0}
+.srow .bt{display:flex;gap:6px;flex-wrap:wrap}
+.srow.right{background:var(--ok-soft);border-color:var(--ok)}
+.srow.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.btn{font:inherit;font-weight:700;background:var(--btn);color:var(--btn-fg);border:0;border-radius:10px;padding:9px 16px;cursor:pointer}
+.btn.orange{background:var(--orange);color:#fff}
+.btn.soft{background:var(--paper);color:var(--ink);border:1.5px solid var(--line)}
+.btn.sel{background:var(--orange);color:#fff;border-color:var(--orange)}
+.btn.small{padding:6px 11px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.opt:focus-visible,.step:focus-visible,.chk:focus-within{outline:3px solid var(--orange);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.status{font-size:.95rem;color:var(--muted)}
+.status.done{color:var(--ok);font-weight:700}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+/* Simulationen */
+.sim{background:var(--sim);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sim canvas,.sim svg{width:100%;height:auto;display:block;max-width:100%}
+.sim .readout{font-family:var(--head);font-weight:600;color:var(--heading)}
+.split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:640px){.split{grid-template-columns:1fr}}
+.log{width:100%;border-collapse:collapse;font-size:.92rem}
+.log th,.log td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+.log th{color:var(--muted);font-weight:700}
+.tbl{overflow-x:auto}
+.tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.82rem;font-weight:700}
+.tag.y{background:var(--ok-soft);color:var(--ok)} .tag.n{background:var(--bad-soft);color:var(--bad)}
+.photo{border-radius:12px;border:1px solid var(--line);width:140px;max-width:100%;aspect-ratio:1;object-fit:cover}
+input[type=range]{width:100%;accent-color:var(--orange)}
+.summary{background:var(--ok-soft);border:1.5px solid var(--ok);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.summary ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.minus{color:var(--minus);font-weight:700}.plus{color:var(--plus);font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <span class="eyebrow">Physik · Klasse 9 · Lernpfad</span>
+    <h1>Elektrostatik I</h1>
+    <p class="lead">Elektrische Ladungen: Aufladen, Entladen und der Aufbau der Atome. Arbeite die acht Stationen der Reihe nach durch. Eine Station ist geschafft, wenn alle Aufgaben darin grün sind. Deine Versuche protokollierst du auf dem Arbeitsbogen.</p>
+  </div>
+  <nav class="steps" id="steps" aria-label="Stationen"></nav>
+  <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+
+  <!-- 1 -->
+  <section class="station" data-st="0">
+    <header><span class="eyebrow">Station 1 · Versuch A1</span><h2>Aufladen durch Reibung</h2></header>
+    <p>Reibe den Luftballon am Papier und beobachte, was mit den Ladungen passiert. Jeder Körper hat am Anfang gleich viele <span class="plus">positive</span> und <span class="minus">negative</span> Ladungen: Er ist <b>neutral</b>.</p>
+    <div class="sim">
+      <canvas id="cv1" aria-label="Luftballon und Papier mit ihren Ladungen"></canvas>
+      <div class="row"><button class="btn orange" id="b1rub">Ballon am Papier reiben</button><button class="btn soft small" id="b1reset">Neu starten</button></div>
+      <div class="readout" id="r1">Beide Körper sind neutral.</div>
+      <div id="pairs1" hidden>
+        <p class="prompt" style="margin-bottom:6px">Jetzt annähern: Welche zwei Körper bringst du zusammen?</p>
+        <div class="chips"><button class="btn soft small" data-p="bb">(a) Ballon und Ballon</button><button class="btn soft small" data-p="bp">(b) Ballon und Papier</button><button class="btn soft small" data-p="pp">(c) Papier und Papier</button></div>
+      </div>
+    </div>
+    <p class="status" id="s1"></p>
+    <div class="task" id="q1"></div>
+    <div class="task" id="sort1"></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="station" data-st="1" hidden>
+    <header><span class="eyebrow">Station 2 · Versuche A2 und A3</span><h2>Entladen und die Glimmlampe</h2></header>
+    <p><b>Versuch A2:</b> Ballon und Papier sind geladen. Was passiert, wenn sie sich berühren?</p>
+    <div class="sim">
+      <canvas id="cv2" aria-label="Geladener Ballon berührt geladenes Papier"></canvas>
+      <div class="row"><button class="btn orange" id="b2touch">Berühren lassen</button><button class="btn soft small" id="b2reset">Neu aufladen</button></div>
+      <div class="readout" id="r2">Ballon negativ, Papier positiv: Sie ziehen sich an.</div>
+    </div>
+    <div class="task" id="q2a"></div>
+    <div class="task">
+      <p><b>Versuch A3:</b> Halte die Stabglimmlampe an einer Metallkappe fest und berühre mit dem anderen Ende einen geladenen Körper. Welche Elektrode leuchtet?</p>
+      <div class="sim">
+        <svg id="lamp" viewBox="0 0 360 150" role="img" aria-label="Stabglimmlampe berührt einen geladenen Körper"></svg>
+        <div class="row"><button class="btn soft small" id="l2n">Luftballon (negativ)</button><button class="btn soft small" id="l2p">Papier (positiv)</button><button class="btn orange" id="l2go" disabled>Berühren</button></div>
+        <div class="readout" id="r2l">Wähle einen Körper.</div>
+      </div>
+    </div>
+    <p class="status" id="s2"></p>
+    <div class="task" id="q2b"></div>
+    <details><summary>Für Profis: Warum leuchtet genau diese Elektrode?</summary>In der Glimmlampe leuchtet das Neongas immer an der Elektrode, an der die Elektronen in die Lampe <b>hineinströmen</b>. Beim negativen Ballon strömen sie vom Ballon in die Lampe, beim positiven Papier kommen sie aus deiner Hand.</details>
+  </section>
+
+  <!-- 3 -->
+  <section class="station" data-st="2" hidden>
+    <header><span class="eyebrow">Station 3 · Info</span><h2>Wie ist ein Atom aufgebaut?</h2></header>
+    <div class="split">
+      <div class="sim">
+        <svg id="atom" viewBox="0 0 240 240" role="img" aria-label="Helium-Atom im Schalenmodell"></svg>
+        <div class="row"><button class="btn soft small" id="a3rem">Elektron entfernen</button><button class="btn soft small" id="a3add">Elektron hinzufügen</button></div>
+        <div class="readout" id="r3">Helium: 2 ⊕ im Kern, 2 Elektronen. Das Atom ist neutral.</div>
+      </div>
+      <div class="info"><b>Atomkern und Hülle:</b> Jedes Atom besteht aus einem <b>positiv</b> geladenen Atomkern und einer Atomhülle aus <b>negativ</b> geladenen Elektronen. Insgesamt ist es neutral. Das Elektron trägt die <b>kleinste negative Ladung</b>.</div>
+    </div>
+    <p class="status" id="s3"></p>
+    <div class="task" id="sort3"></div>
+    <div class="task" id="q3"></div>
+    <details><summary>Für Profis: Wie groß ist der Kern?</summary>Ein Atom ist etwa 10<sup>−10</sup> m groß, sein Kern nur 10<sup>−15</sup> m, also 100 000-mal kleiner. Wäre der Kern eine Murmel (1 cm), dann wäre das Atom einen Kilometer groß!</details>
+  </section>
+
+  <!-- 4 -->
+  <section class="station" data-st="3" hidden>
+    <header><span class="eyebrow">Station 4 · Modell</span><h2>Kräfte zwischen Ladungen</h2></header>
+    <p>Stelle die Ladung der beiden Kugeln ein und beobachte die Kraftpfeile. Probiere alle Kombinationen aus.</p>
+    <div class="sim">
+      <svg id="force" viewBox="0 0 320 130" role="img" aria-label="Zwei geladene Kugeln mit Kraftpfeilen"></svg>
+      <div class="row" style="justify-content:space-between"><button class="btn soft small" id="f4a">linke Kugel: ⊖</button><button class="btn soft small" id="f4b">rechte Kugel: ⊖</button></div>
+      <div class="readout" id="r4"></div>
+    </div>
+    <p class="status" id="s4"></p>
+    <div class="task" id="q4"></div>
+    <div class="task" id="sort4"></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="station" data-st="4" hidden>
+    <header><span class="eyebrow">Station 5 · Anwenden</span><h2>Elektronenaffinität</h2></header>
+    <div class="split">
+      <div class="q">
+        <p>Die <b>Elektronenaffinität</b> ist die Neigung eines Materials, Elektronen aufzunehmen. Wähle zwei Materialien und reibe sie aneinander.</p>
+        <p class="prompt">1. Material</p><div class="chips" id="m5a"></div>
+        <p class="prompt">2. Material</p><div class="chips" id="m5b"></div>
+        <div class="row"><button class="btn orange" id="b5" disabled>Aneinander reiben</button></div>
+        <div class="readout" id="r5"></div>
+      </div>
+      <div class="sim" id="rank5" aria-label="Reihe der Elektronenaffinität"></div>
+    </div>
+    <p class="status" id="s5"></p>
+    <div class="task" id="sort5"></div>
+    <div class="task" id="q5"></div>
+    <details><summary>Für Profis: Elektrizitätsquellen</summary>Auch in einem Akku oder einer Solarzelle findet <b>Ladungstrennung</b> statt. Dadurch entsteht ein Minuspol (Elektronenüberschuss) und ein Pluspol (Elektronenmangel). Das ist die Voraussetzung für elektrischen Strom.</details>
+  </section>
+
+  <!-- 6 -->
+  <section class="station" data-st="5" hidden>
+    <header><span class="eyebrow">Station 6 · Versuche A4 und A5</span><h2>Lametta und Ping-Pong</h2></header>
+    <div class="info">Die Versuche A4 und A5 machen wir <b>gemeinsam</b>! Hier kannst du sie dir noch einmal in Ruhe ansehen.</div>
+    <p><b>Versuch A5:</b> Ein mit Alufolie überzogener Ball hängt zwischen zwei Metallplatten an einer Hochspannung. Schalte die Spannung ein und stoße den Ball an.</p>
+    <div class="sim">
+      <canvas id="cv6" aria-label="Ping-Pong-Ball zwischen zwei geladenen Platten"></canvas>
+      <div class="row"><button class="btn orange" id="b6">Hochspannung einschalten</button><span class="readout" id="r6"></span></div>
+    </div>
+    <p class="status" id="s6"></p>
+    <div class="task" id="q6a"></div>
+    <div class="task" id="q6b"></div>
+    <div class="safety"><b>Achtung Hochspannung:</b> Diese Versuche führt nur die Lehrkraft durch. Fasse die Platten und den Bandgenerator nicht an.</div>
+  </section>
+
+  <!-- 7 -->
+  <section class="station" data-st="6" hidden>
+    <header><span class="eyebrow">Station 7 · Geschichte</span><h2>Wer hat's entdeckt?</h2></header>
+    <p>Ordne die Entdeckungen den Personen zu. Infos findest du in der Präsentation („Info: Geschichte“).</p>
+    <div class="task" id="sort7"></div>
+    <div class="task" id="ord7"></div>
+    <div class="task">
+      <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:16px">
+        <p style="flex:1;min-width:0"><b>1844</b> stellte Samuel Morse seinen Schreibtelegrafen vor. Eine Taste schließt einen Stromkreis, beim Empfänger zieht ein Elektromagnet einen Stift an, der kurze und lange Striche auf einen Papierstreifen drückt.</p>
+      </div>
+      <div class="sim"><p class="readout" style="font-size:1.6rem;letter-spacing:.15em;text-align:center">· · ·  – – –  · · ·</p></div>
+    </div>
+    <div class="task" id="q7"></div>
+  </section>
+
+  <!-- 8 -->
+  <section class="station" data-st="7" hidden>
+    <header><span class="eyebrow">Station 8 · Abschluss</span><h2>Kannst du es?</h2></header>
+    <p>Fünf Fragen aus allen Stationen.</p>
+    <div class="task" id="f1"></div>
+    <div class="task" id="f2"></div>
+    <div class="task" id="f3"></div>
+    <div class="task" id="f4"></div>
+    <div class="task" id="f5"></div>
+    <div class="summary" id="summary" hidden>
+      <h3>Geschafft! Das hast du gelernt</h3>
+      <ul>
+        <li>Es gibt <b>positive</b> und <b>negative</b> elektrische Ladungen. Das <b>Elektron</b> trägt die kleinste negative Ladung.</li>
+        <li>Ein Atom besteht aus einem <b>positiven Kern</b> und einer <b>Hülle aus Elektronen</b>. Insgesamt ist es neutral.</li>
+        <li>Positiv geladen = <b>Elektronenmangel</b>, negativ geladen = <b>Elektronenüberschuss</b>, neutral = gleich viele + und −.</li>
+        <li>Beim <b>Reiben</b> gehen Elektronen über: Es findet <b>Ladungstrennung</b> statt. Wer welche Ladung bekommt, zeigt die <b>Elektronenaffinität</b>.</li>
+        <li><b>Gleichnamige</b> Ladungen stoßen sich ab, <b>ungleichnamige</b> ziehen sich an.</li>
+        <li>Bei Berührung gleichen sich Ladungen aus (<b>Entladen</b>). Die <b>Glimmlampe</b> zeigt die Art der Ladung.</li>
+      </ul>
+      <p class="status">Zeige diese Übersicht deiner Lehrkraft.</p>
+    </div>
+    <p class="status" id="missing"></p>
+  </section>
+
+  <div class="nav">
+    <button class="btn soft" id="prev">← Zurück</button>
+    <button class="btn" id="next">Weiter →</button>
+  </div>
+</div>
+
+<script>
+(function(){
+const KEY="lernpfad-elektrostatik1";
+const STATIONS=[
+ {name:"Aufladen",req:["s1-rub","s1-pairs","q1","sort1"]},
+ {name:"Entladen",req:["s2-touch","s2-lampN","s2-lampP","q2a","q2b"]},
+ {name:"Atom",req:["s3-ion","sort3","q3"]},
+ {name:"Kräfte",req:["s4-same","s4-diff","q4","sort4"]},
+ {name:"Affinität",req:["s5-tests","sort5","q5"]},
+ {name:"Ping-Pong",req:["s6-run","q6a","q6b"]},
+ {name:"Geschichte",req:["sort7","ord7","q7"]},
+ {name:"Abschluss",req:["f1","f2","f3","f4","f5"]}
+];
+/* ---------- Grundgerüst (wie Lernpfad Elektrostatik V) ---------- */
+const S={done:{},cur:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object"){Object.assign(S,s);}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const $=id=>document.getElementById(id);
+const el=(t,cls,html)=>{const e=document.createElement(t);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim();
+const N=STATIONS.length;
+const complete=i=>STATIONS[i].req.every(r=>S.done[r]);
+function mark(id){if(!S.done[id]){S.done[id]=true;save();}refresh();}
+
+/* ---------- Navigation ---------- */
+const stepsEl=$("steps");
+STATIONS.forEach((s,i)=>{const b=el("button","step",`<b>${i+1}</b><span>${s.name}</span>`);b.type="button";b.onclick=()=>go(i);b.setAttribute("aria-label",`Station ${i+1}: ${s.name}`);stepsEl.appendChild(b);});
+function go(i){S.cur=Math.max(0,Math.min(N-1,i));save();
+ document.querySelectorAll(".station").forEach(s=>s.hidden=+s.dataset.st!==S.cur);refresh();
+ if(typeof onStation==="function")onStation(S.cur);
+ window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});}
+$("prev").onclick=()=>go(S.cur-1);$("next").onclick=()=>go(S.cur+1);
+function refresh(){
+ let n=0;[...stepsEl.children].forEach((b,i)=>{const d=complete(i);if(d)n++;b.classList.toggle("done",d);b.classList.toggle("cur",i===S.cur);b.setAttribute("aria-current",i===S.cur?"step":"false");});
+ $("barfill").style.width=(n/N*100)+"%";
+ $("prev").disabled=S.cur===0;$("next").disabled=S.cur===N-1;
+ const allPrev=[...Array(N-1).keys()].every(complete);
+ $("summary").hidden=!(complete(N-1)&&allPrev);
+ const miss=STATIONS.map((s,i)=>complete(i)?null:i+1).filter(Boolean);
+ $("missing").textContent=complete(N-1)&&!allPrev?`Noch offen: Station ${miss.join(", ")}. Dann erscheint deine Übersicht.`:"";
+}
+
+/* ---------- Aufgabentypen ---------- */
+function mc(id,prompt,opts){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","opts"),fb=el("p","fb");fb.hidden=true;
+ shuffle(opts).forEach(o=>{const b=el("button","opt",o.t);b.type="button";
+  b.onclick=()=>{fb.hidden=false;
+   if(o.ok){b.classList.add("right");[...list.children].forEach(x=>x.disabled=true);fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+(o.fb||"");mark(id);}
+   else{b.classList.add("wrong");b.disabled=true;fb.className="fb no";fb.innerHTML="<b>Nicht ganz.</b> "+(o.fb||"Versuch es noch einmal.");}};
+  if(S.done[id]){b.disabled=true;if(o.ok){b.classList.add("right");fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+(o.fb||"");}}
+  list.appendChild(b);});
+ q.append(list,fb);box.appendChild(q);
+}
+function sortTask(id,prompt,cats,items){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","sort"),fb=el("p","fb");fb.hidden=true;
+ const check=()=>{if(items.every((_,i)=>S.done[id+":"+i])){fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Alles richtig zugeordnet.</b>";mark(id);}};
+ shuffle(items.map((it,i)=>({...it,i}))).forEach(it=>{
+  const r=el("div","srow"),lab=el("span",null,it.t),bt=el("div","bt");
+  cats.forEach(c=>{const b=el("button","btn soft small",c);b.type="button";
+   b.onclick=()=>{if(c===it.c){r.classList.add("right");[...bt.children].forEach(x=>x.disabled=true);b.classList.add("sel");S.done[id+":"+it.i]=true;save();fb.hidden=true;check();}
+    else{r.classList.remove("shake");void r.offsetWidth;r.classList.add("shake");fb.hidden=false;fb.className="fb no";fb.innerHTML="<b>Nicht ganz:</b> "+(it.fb||"Überlege noch einmal.");}};
+   if(S.done[id+":"+it.i]){b.disabled=true;if(c===it.c)b.classList.add("sel");}
+   bt.appendChild(b);});
+  if(S.done[id+":"+it.i])r.classList.add("right");
+  r.append(lab,bt);list.appendChild(r);});
+ q.append(list,fb);box.appendChild(q);check();
+}
+function multi(id,prompt,opts,okText){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","opts"),fb=el("p","fb");fb.hidden=true;
+ const rows=shuffle(opts).map((o,k)=>{const l=el("label","chk");const c=document.createElement("input");c.type="checkbox";c.id=id+"-c"+k;
+  l.append(c,el("span",null,o.t));list.appendChild(l);if(S.done[id]&&o.ok){c.checked=true;l.classList.add("right");}if(S.done[id])c.disabled=true;return{o,c,l};});
+ const btn=el("button","btn","Prüfen");btn.type="button";
+ btn.onclick=()=>{let right=0,wrong=0,need=0;rows.forEach(r=>{r.l.classList.remove("right","wrong");if(r.o.ok)need++;
+   if(r.c.checked&&r.o.ok){right++;r.l.classList.add("right");}else if(r.c.checked&&!r.o.ok){wrong++;r.l.classList.add("wrong");}});
+  fb.hidden=false;
+  if(right===need&&wrong===0){fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;rows.forEach(r=>r.c.disabled=true);btn.disabled=true;mark(id);}
+  else{fb.className="fb no";fb.innerHTML=`<b>Noch nicht.</b> ${right} von ${need} richtigen gefunden`+(wrong?`, ${wrong} falsch angekreuzt (rot).`:".");}};
+ if(S.done[id]){btn.disabled=true;fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;}
+ q.append(list,btn,fb);box.appendChild(q);
+}
+/* Reihenfolge: Schritte in der richtigen Reihenfolge anklicken */
+function orderTask(id,prompt,steps,okText){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","sort"),fb=el("p","fb");fb.hidden=true;let next=0;
+ const rows=shuffle(steps.map((t,i)=>({t,i}))).map(s=>{
+  const r=el("div","srow"),num=el("b",null,""),lab=el("span",null,s.t);num.style.minWidth="1.6em";num.style.color="var(--ok)";
+  r.style.cursor="pointer";r.tabIndex=0;r.setAttribute("role","button");
+  const pick=()=>{if(S.done[id]||r.classList.contains("right"))return;
+   if(s.i===next){r.classList.add("right");num.textContent=(next+1)+".";next++;fb.hidden=true;
+    if(next===steps.length){fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtige Reihenfolge.</b> "+(okText||"");mark(id);}}
+   else{r.classList.remove("shake");void r.offsetWidth;r.classList.add("shake");fb.hidden=false;fb.className="fb no";fb.innerHTML=`<b>Nicht ganz:</b> Das ist nicht Schritt ${next+1}. Überlege, was davor passieren muss.`;}};
+  r.onclick=pick;r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};
+  if(S.done[id]){r.classList.add("right");num.textContent=(s.i+1)+".";}
+  r.style.justifyContent="flex-start";r.append(num,lab);list.appendChild(r);return r;});
+ if(S.done[id]){fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtige Reihenfolge.</b> "+(okText||"");
+  rows.sort((a,b)=>parseInt(a.firstChild.textContent)-parseInt(b.firstChild.textContent)).forEach(r=>list.appendChild(r));}
+ q.append(el("p","status","Klicke die Schritte nacheinander in der richtigen Reihenfolge an."),list,fb);box.appendChild(q);
+}
+/* Zahl eingeben */
+function numTask(id,prompt,answer,tol,unit,okText,hint){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const row=el("div","row"),inp=document.createElement("input");inp.type="text";inp.inputMode="decimal";inp.className="opt";inp.style.maxWidth="9em";inp.setAttribute("aria-label","Antwort");
+ const btn=el("button","btn","Prüfen"),fb=el("p","fb");btn.type="button";fb.hidden=true;
+ btn.onclick=()=>{const v=parseFloat(inp.value.replace(",","."));fb.hidden=false;
+  if(!isNaN(v)&&Math.abs(v-answer)<=tol){fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;inp.disabled=true;btn.disabled=true;mark(id);}
+  else{fb.className="fb no";fb.innerHTML="<b>Nicht ganz.</b> "+hint;}};
+ if(S.done[id]){inp.value=String(answer).replace(".",",");inp.disabled=true;btn.disabled=true;fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;}
+ row.append(inp,el("span",null,unit),btn);q.append(row,fb);box.appendChild(q);
+}
+
+/* ---------- Canvas-Hilfe ---------- */
+function setupCanvas(cv,W,H){if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h){this.rect(x,y,w,h);};const d=Math.min(window.devicePixelRatio||1,2);cv.width=W*d;cv.height=H*d;cv.style.aspectRatio=W+"/"+H;const c=cv.getContext("2d");c.setTransform(d,0,0,d,0,0);return c;}
+function dot(c,x,y,r,f){c.fillStyle=f;c.beginPath();c.arc(x,y,r,0,7);c.fill();}
+function charge(c,x,y,r,col,plus){dot(c,x,y,r,col);c.strokeStyle="#fff";c.lineWidth=Math.max(1.5,r*0.28);c.beginPath();c.moveTo(x-r*.5,y);c.lineTo(x+r*.5,y);if(plus){c.moveTo(x,y-r*.5);c.lineTo(x,y+r*.5);}c.stroke();}
+function arrow(c,x1,y1,x2,y2,col,w){c.strokeStyle=col;c.fillStyle=col;c.lineWidth=w||3;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+ const a=Math.atan2(y2-y1,x2-x1),h=10;c.beginPath();c.moveTo(x2+Math.cos(a)*2,y2+Math.sin(a)*2);c.lineTo(x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45));c.lineTo(x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45));c.fill();}
+const svgCharge=(x,y,r,plus)=>`<circle cx="${x}" cy="${y}" r="${r}" style="fill:var(${plus?"--plus":"--minus"})"/><path d="M${x-r*.5} ${y}H${x+r*.5}${plus?`M${x} ${y-r*.5}V${y+r*.5}`:""}" stroke="#fff" stroke-width="${Math.max(1.5,r*.28)}"/>`;
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+
+/* ---------- Körper zeichnen ---------- */
+function body(c,type,x,y,np,nm,C){
+ if(type==="b"){c.strokeStyle=C.muted;c.lineWidth=1.5;c.beginPath();c.moveTo(x,y+66);c.quadraticCurveTo(x+10,y+95,x-4,y+120);c.stroke();
+  c.fillStyle=C.balloon;c.strokeStyle=C.ink;c.lineWidth=2;c.beginPath();c.ellipse(x,y,52,66,0,0,7);c.fill();c.stroke();
+  c.beginPath();c.moveTo(x-6,y+66);c.lineTo(x+6,y+66);c.lineTo(x,y+60);c.closePath();c.fill();}
+ else{c.fillStyle=C.paper;c.strokeStyle=C.ink;c.lineWidth=2;c.beginPath();c.roundRect(x-42,y-62,84,124,4);c.fill();c.stroke();}
+ const g=[];for(let r=0;r<4;r++)for(let k=0;k<4;k++)g.push([x-30+k*20,y-30+r*20]);
+ const PS=[0,2,5,7,10,13],MS=[1,4,6,11,14,8,15,3,9,12];
+ for(let i=0;i<np;i++){const p=g[PS[i]];charge(c,p[0],p[1],7.5,C.plus,true);}
+ for(let i=0;i<nm;i++){const p=g[MS[i]];charge(c,p[0],p[1],7.5,C.minus,false);}
+}
+const colors=()=>({ink:css("ink"),muted:css("muted"),plus:css("plus"),minus:css("minus"),balloon:css("glow"),paper:css("card"),or:css("orange")});
+
+/* ---------- Station 1 ---------- */
+const c1=setupCanvas($("cv1"),640,300);let k1=S.k1||0,rubT=0,pair=null;
+function draw1(){const C=colors();c1.clearRect(0,0,640,300);
+ if(pair){const types={bb:["b","b"],bp:["b","p"],pp:["p","p"]}[pair];const same=types[0]===types[1];
+  const off=same?40:-40;const xa=210-off,xb=430+off;
+  types.forEach((t,i)=>{const isB=t==="b";body(c1,t,i?xb:xa,130,6,isB?6+k1:6-k1,C);});
+  c1.textAlign="center";c1.font="14px sans-serif";c1.fillStyle=C.muted;
+  if(same){arrow(c1,xa-60,250,xa-110,250,C.or,4);arrow(c1,xb+60,250,xb+110,250,C.or,4);c1.fillText("Abstoßung",320,255);}
+  else{arrow(c1,xa+60,250,xa+100,250,C.or,4);arrow(c1,xb-60,250,xb-100,250,C.or,4);c1.fillText("Anziehung",320,285);}
+  return;}
+ const dx=rubT>0?Math.sin(rubT*0.5)*40+40:0;
+ body(c1,"b",200+dx,130,6,6+k1,C);body(c1,"p",440,130,6,6-k1,C);
+ c1.fillStyle=C.muted;c1.font="14px sans-serif";c1.textAlign="center";c1.fillText("Luftballon",200,285);c1.fillText("Papier",440,285);
+}
+function upd1(){
+ $("r1").innerHTML=pair?{bb:"(a) Zwei negative Ballons: <b>gleichnamig</b> → sie stoßen sich ab.",bp:"(b) Ballon negativ, Papier positiv: <b>ungleichnamig</b> → sie ziehen sich an.",pp:"(c) Zwei positive Papiere: <b>gleichnamig</b> → sie stoßen sich ab."}[pair]
+  :k1===0?"Beide Körper sind neutral.":k1<4?`${k1} Elektron${k1>1?"en sind":" ist"} vom Papier auf den Ballon übergegangen. Weiter reiben!`
+  :"Der Ballon hat jetzt <b>Elektronenüberschuss</b> (negativ), das Papier <b>Elektronenmangel</b> (positiv).";
+ $("pairs1").hidden=k1<4;if(k1>=4)mark("s1-rub");
+ const seen=S.p1||{};if(seen.bb&&seen.bp&&seen.pp)mark("s1-pairs");
+ const t=[];if(!S.done["s1-rub"])t.push("Ballon aufladen");else ["bb","bp","pp"].forEach((p,i)=>{if(!seen[p])t.push("(" + "abc"[i]+")");});
+ $("s1").textContent=t.length?"Noch ausprobieren: "+t.join(", "):"";
+ [...document.querySelectorAll("#pairs1 [data-p]")].forEach(b=>b.classList.toggle("sel",b.dataset.p===pair));
+ draw1();}
+$("b1rub").onclick=()=>{if(k1>=4||rubT>0){pair=null;upd1();return;}pair=null;let n=0;
+ const tick=()=>{rubT++;draw1();if(rubT%13===0){k1=Math.min(4,k1+1);S.k1=k1;save();upd1();}
+  if(rubT<52&&k1<4)requestAnimationFrame(tick);else{rubT=0;upd1();}};
+ if(reduced){k1=4;S.k1=4;save();upd1();}else tick();};
+$("b1reset").onclick=()=>{k1=0;S.k1=0;pair=null;save();upd1();};
+document.querySelectorAll("#pairs1 [data-p]").forEach(b=>b.onclick=()=>{pair=b.dataset.p;S.p1=S.p1||{};S.p1[pair]=true;save();upd1();});
+mc("q1","Warum ist der Luftballon nach dem Reiben negativ geladen?",[
+ {t:"Beim Reiben sind Elektronen vom Papier auf den Ballon übergegangen.",ok:true,fb:"Der Ballon hat jetzt mehr Elektronen als positive Ladungen: Elektronenüberschuss."},
+ {t:"Beim Reiben sind positive Ladungen vom Ballon auf das Papier gewandert.",fb:"Die positiven Ladungen sitzen fest in den Atomkernen. Beim Reiben bewegen sich nur Elektronen."},
+ {t:"Durch die Reibung entstehen neue Elektronen.",fb:"Ladungen werden nicht erzeugt, sondern nur getrennt. Zähle die Ladungen in der Simulation."},
+ {t:"Der Ballon war schon vorher negativ.",fb:"Am Anfang hatten beide Körper gleich viele + und −. Sie waren neutral."}]);
+sortTask("sort1","Ziehen sich die Körper an oder stoßen sie sich ab?",["ziehen sich an","stoßen sich ab"],[
+ {t:"zwei geriebene Luftballons",c:"stoßen sich ab",fb:"Beide sind negativ geladen."},
+ {t:"geriebener Luftballon und das Papier, an dem er gerieben wurde",c:"ziehen sich an",fb:"Ballon negativ, Papier positiv."},
+ {t:"zwei Papiere, an denen Ballons gerieben wurden",c:"stoßen sich ab",fb:"Beide Papiere sind positiv geladen."},
+ {t:"die Haare des Jungen auf der Rutsche untereinander",c:"stoßen sich ab",fb:"Alle Haare sind gleich geladen. Deshalb stehen sie ab."}]);
+
+/* ---------- Station 2 ---------- */
+const c2=setupCanvas($("cv2"),640,260);let k2=S.k2??4,gap2=S.k2===0?0:60;
+function draw2(){const C=colors();c2.clearRect(0,0,640,260);body(c2,"b",250-gap2,125,6,6+k2,C);body(c2,"p",360+gap2,125,6,6-k2,C);}
+function upd2(){$("r2").innerHTML=k2===4?"Ballon negativ, Papier positiv: Sie ziehen sich an.":k2>0?"Elektronen fließen vom Ballon auf das Papier zurück …":"Beide Körper sind wieder <b>neutral</b>. Es wirken keine Kräfte mehr.";draw2();}
+$("b2touch").onclick=()=>{if(k2===0)return;$("b2touch").disabled=true;
+ const step=()=>{if(gap2>0){gap2=Math.max(0,gap2-4);draw2();requestAnimationFrame(step);return;}
+  setTimeout(()=>{k2--;upd2();if(k2>0)step();else{S.k2=0;save();mark("s2-touch");$("b2touch").disabled=false;}},reduced?0:350);};step();};
+$("b2reset").onclick=()=>{k2=4;gap2=60;S.k2=4;save();upd2();};
+let lampSel=null,lampLit=false;
+function drawLamp(){const s=$("lamp"),ink=css("ink"),glow=css("glow");const neg=lampSel==="n";
+ const bodyX=60;
+ let b=lampSel==null?`<text x="${bodyX}" y="80" text-anchor="middle" font-size="12" fill="${css("muted")}" font-family="sans-serif">Körper wählen</text>`
+  :neg?`<ellipse cx="${bodyX}" cy="75" rx="42" ry="54" style="fill:var(--glow)" stroke="${ink}" stroke-width="2"/>${svgCharge(45,60,8,false)}${svgCharge(70,80,8,false)}${svgCharge(50,100,8,false)}`
+  :`<rect x="${bodyX-34}" y="22" width="68" height="106" rx="3" style="fill:var(--card)" stroke="${ink}" stroke-width="2"/>${svgCharge(45,55,8,true)}${svgCharge(72,80,8,true)}${svgCharge(48,105,8,true)}`;
+ const near=lampLit&&neg, far=lampLit&&!neg;
+ s.innerHTML=`${b}
+  <path d="M110 75 L130 60 H270 L290 75 L270 90 H130 Z" style="fill:var(--chrome)" stroke="${ink}" stroke-width="2"/>
+  <rect x="140" y="62" width="120" height="26" style="fill:var(--lamp)" stroke="${ink}" stroke-width="1.5"/>
+  ${near?`<ellipse cx="172" cy="75" rx="30" ry="14" fill="${glow}" opacity=".85"/>`:""}${far?`<ellipse cx="228" cy="75" rx="30" ry="14" fill="${glow}" opacity=".85"/>`:""}
+  <path d="M145 68 H170 L180 82 H195" fill="none" stroke="${ink}" stroke-width="2.5"/><path d="M205 68 H220 L230 82 H255" fill="none" stroke="${ink}" stroke-width="2.5"/>
+  <path d="M290 75 h20 q14 -18 40 -20 M300 75 q20 18 48 18" fill="none" stroke="${css("muted")}" stroke-width="2"/>
+  <text x="200" y="118" text-anchor="middle" font-size="12" fill="${css("muted")}" font-family="sans-serif">Stabglimmlampe</text>
+  <text x="325" y="125" text-anchor="middle" font-size="12" fill="${css("muted")}" font-family="sans-serif">Hand</text>`;}
+function selLamp(v){lampSel=v;lampLit=false;$("l2n").classList.toggle("sel",v==="n");$("l2p").classList.toggle("sel",v==="p");$("l2go").disabled=false;$("r2l").textContent="Berühre den Körper mit der Glimmlampe.";drawLamp();}
+$("l2n").onclick=()=>selLamp("n");$("l2p").onclick=()=>selLamp("p");
+$("l2go").onclick=()=>{lampLit=true;drawLamp();
+ $("r2l").innerHTML=lampSel==="n"?"Die dem Ballon <b>zugewandte</b> Elektrode leuchtet kurz auf.":"Die dem Papier <b>abgewandte</b> Elektrode leuchtet kurz auf.";
+ mark(lampSel==="n"?"s2-lampN":"s2-lampP");setTimeout(()=>{lampLit=false;drawLamp();},reduced?2500:900);upd2s();};
+function upd2s(){const t=[];if(!S.done["s2-touch"])t.push("Berühren lassen");if(!S.done["s2-lampN"])t.push("Glimmlampe am Ballon");if(!S.done["s2-lampP"])t.push("Glimmlampe am Papier");$("s2").textContent=t.length?"Noch ausprobieren: "+t.join(", "):"";}
+mc("q2a","Warum wirken nach der Berührung keine Kräfte mehr?",[
+ {t:"Die überschüssigen Elektronen sind auf das Papier zurückgeflossen und haben dessen positive Ladungen neutralisiert.",ok:true,fb:"Beide Körper sind wieder neutral."},
+ {t:"Die Ladungen sind bei der Berührung verschwunden.",fb:"Ladungen verschwinden nicht. Zähle sie in der Simulation."},
+ {t:"Die positiven Ladungen sind auf den Ballon gewandert.",fb:"Positive Ladungen sitzen fest in den Atomkernen."},
+ {t:"Ballon und Papier sind jetzt beide negativ.",fb:"Dann würden sie sich abstoßen."}]);
+mc("q2b","Du berührst einen unbekannten Körper mit der Glimmlampe. Die dem Körper zugewandte Elektrode leuchtet. Wie ist der Körper geladen?",[
+ {t:"negativ",ok:true,fb:"Merkregel: zugewandte Elektrode leuchtet → Körper negativ."},
+ {t:"positiv",fb:"Beim positiven Papier leuchtete die abgewandte Elektrode."},
+ {t:"neutral",fb:"Bei einem neutralen Körper leuchtet gar nichts."}]);
+
+/* ---------- Station 3 ---------- */
+let e3=S.e3??2;
+function drawAtom(){const s=$("atom"),cx=120,cy=120;let h=`<circle cx="${cx}" cy="${cy}" r="88" style="fill:none;stroke:var(--line)" stroke-width="1.5"/>`;
+ h+=svgCharge(112,113,9,true)+svgCharge(128,127,9,true)+`<circle cx="128" cy="111" r="9" style="fill:var(--neutral)"/><circle cx="112" cy="129" r="9" style="fill:var(--neutral)"/>`;
+ const ang=[-2.3,0.85,2.4];for(let i=0;i<e3;i++){const a=ang[i];h+=svgCharge((cx+88*Math.cos(a)).toFixed(1),(cy+88*Math.sin(a)).toFixed(1),10,false);}
+ h+=`<text x="120" y="160" text-anchor="middle" font-size="11" style="fill:var(--muted);font-family:var(--body)">Kern</text><text x="18" y="232" font-weight="800" font-size="18" style="font-family:var(--head);fill:var(--heading)">He</text>`;
+ s.innerHTML=h;
+ $("r3").innerHTML=e3===2?"Helium: 2 ⊕ im Kern, 2 Elektronen. Das Atom ist <b>neutral</b>.":e3<2?"Ein Elektron fehlt: Elektronenmangel. Das Atom ist jetzt <b>positiv</b> geladen.":"Ein Elektron zu viel: Elektronenüberschuss. Das Atom ist jetzt <b>negativ</b> geladen.";
+ $("a3rem").disabled=e3<=1;$("a3add").disabled=e3>=3;
+ if(e3===1){S.e3p=true;}if(e3===3){S.e3n=true;}save();if(S.e3p&&S.e3n)mark("s3-ion");
+ $("s3").textContent=S.done["s3-ion"]?"":"Noch ausprobieren: "+[!S.e3p?"Elektron entfernen":null,!S.e3n?"Elektron hinzufügen":null].filter(Boolean).join(" und ");}
+$("a3rem").onclick=()=>{e3=Math.max(1,e3-1);S.e3=e3;drawAtom();};$("a3add").onclick=()=>{e3=Math.min(3,e3+1);S.e3=e3;drawAtom();};
+sortTask("sort3","Gehört die Aussage zum Atomkern oder zur Atomhülle?",["Kern","Hülle"],[
+ {t:"ist positiv geladen",c:"Kern",fb:"Elektronen sind negativ. Die positive Ladung sitzt in der Mitte."},
+ {t:"besteht aus negativ geladenen Elektronen",c:"Hülle",fb:"Die Elektronen umkreisen den Kern."},
+ {t:"ist winzig klein im Vergleich zum ganzen Atom",c:"Kern",fb:"Der Kern ist 100 000-mal kleiner als das Atom."},
+ {t:"gibt beim Reiben Teilchen ab oder nimmt welche auf",c:"Hülle",fb:"Beim Reiben werden nur Elektronen verschoben."},
+ {t:"bleibt beim Aufladen fest an seinem Platz",c:"Kern",fb:"Bei Ladungsvorgängen bewegen sich nur Elektronen."}]);
+mc("q3","Ein neutrales Atom nimmt ein Elektron auf. Wie ist es danach geladen?",[
+ {t:"negativ",ok:true,fb:"Es hat jetzt ein Elektron mehr als positive Ladungen im Kern."},
+ {t:"positiv",fb:"Positiv wird es, wenn es ein Elektron abgibt."},
+ {t:"neutral",fb:"Dann müssten + und − gleich viele sein. Zähle nach."}]);
+
+/* ---------- Station 4 ---------- */
+let fa=S.fa||"-",fb4=S.fb4||"-";
+function drawF(){const s=$("force"),ink=css("ink"),or=css("orange");const same=fa===fb4;
+ const xa=same?100:120,xb=same?220:200;
+ const arr=(x1,x2)=>{const d=x2>x1?1:-1;return `<line x1="${x1}" y1="65" x2="${x2-d*8}" y2="65" stroke="${or}" stroke-width="4"/><path d="M${x2} 65 l${-d*12} -7 v14 z" fill="${or}"/>`;};
+ s.innerHTML=`${svgCharge(xa,65,24,fa==="+")}${svgCharge(xb,65,24,fb4==="+")}`+(same?arr(xa-30,xa-75)+arr(xb+30,xb+75):arr(xa+28,xa+52)+arr(xb-28,xb-52))+
+ `<text x="160" y="122" text-anchor="middle" font-size="13" style="fill:var(--muted);font-family:var(--body)">${same?"gleichnamig: Abstoßung":"ungleichnamig: Anziehung"}</text>`;
+ $("f4a").textContent="linke Kugel: "+(fa==="+"?"⊕":"⊖");$("f4b").textContent="rechte Kugel: "+(fb4==="+"?"⊕":"⊖");
+ $("r4").innerHTML=same?"Beide Ladungen sind <b>gleichnamig</b>: Die Kugeln <b>stoßen sich ab</b>.":"Die Ladungen sind <b>ungleichnamig</b>: Die Kugeln <b>ziehen sich an</b>.";
+ if(same){S["f"+fa]=true;}else mark("s4-diff");save();if(S["f+"]&&S["f-"])mark("s4-same");
+ const t=[];if(!S["f-"])t.push("⊖ und ⊖");if(!S["f+"])t.push("⊕ und ⊕");if(!S.done["s4-diff"])t.push("⊕ und ⊖");$("s4").textContent=t.length?"Noch ausprobieren: "+t.join(", "):"";}
+$("f4a").onclick=()=>{fa=fa==="+"?"-":"+";S.fa=fa;drawF();};$("f4b").onclick=()=>{fb4=fb4==="+"?"-":"+";S.fb4=fb4;drawF();};
+mc("q4","Welcher Merksatz stimmt?",[
+ {t:"Gleichnamige Ladungen stoßen sich ab, ungleichnamige ziehen sich an.",ok:true,fb:"Diese elektrischen Kräfte heißen auch Coulomb-Kräfte."},
+ {t:"Gleichnamige Ladungen ziehen sich an, ungleichnamige stoßen sich ab.",fb:"Schau dir die Pfeile bei ⊖ und ⊖ an."},
+ {t:"Nur positive Ladungen üben Kräfte aus.",fb:"Auch zwei negative Kugeln stoßen sich ab."}]);
+sortTask("sort4","Was zeichnet den Körper aus?",["Elektronenmangel","Elektronenüberschuss","gleich viele + und −"],[
+ {t:"ein positiv geladener Körper",c:"Elektronenmangel",fb:"Ihm fehlen Elektronen."},
+ {t:"ein negativ geladener Körper",c:"Elektronenüberschuss",fb:"Er hat zu viele Elektronen."},
+ {t:"ein neutraler Körper",c:"gleich viele + und −",fb:"Neutral heißt nicht „ohne Ladung“, sondern ausgeglichen."},
+ {t:"das Papier nach dem Reiben am Ballon",c:"Elektronenmangel",fb:"Das Papier hat Elektronen an den Ballon abgegeben."},
+ {t:"der Ballon nach dem Reiben am Papier",c:"Elektronenüberschuss",fb:"Der Ballon hat Elektronen aufgenommen."}]);
+
+/* ---------- Station 5 ---------- */
+const MAT=["PVC","Kautschuk (Luftballon)","Baumwolle","Papier","Seide","Menschenhaare","Glas","Katzenfell"];
+let m5a=null,m5b=null;S.t5=S.t5||{};
+$("rank5").innerHTML=`<div class="readout" style="text-align:center">▲ hohe Elektronenaffinität</div>`+MAT.map((m,i)=>`<div id="rk${i}" style="text-align:center;padding:4px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--card)">${m}</div>`).join("")+`<div class="readout" style="text-align:center">▼ niedrige Elektronenaffinität</div>`;
+function mkChips(box,setter){MAT.forEach((m,i)=>{const b=el("button","btn soft small",m);b.type="button";b.onclick=()=>{setter(i);[...$(box).children].forEach(x=>x.classList.remove("sel"));b.classList.add("sel");upd5();};$(box).appendChild(b);});}
+mkChips("m5a",i=>m5a=i);mkChips("m5b",i=>m5b=i);
+function upd5(){$("b5").disabled=m5a==null||m5b==null||m5a===m5b;MAT.forEach((_,i)=>{const e=$("rk"+i);e.style.borderColor="";e.style.background="var(--card)";e.innerHTML=MAT[i];});
+ const n=Object.keys(S.t5).length;$("s5").textContent=n>=3?"":`${n} von mindestens 3 Paaren getestet`;if(n>=3)mark("s5-tests");}
+$("b5").onclick=()=>{const neg=Math.min(m5a,m5b),pos=Math.max(m5a,m5b);
+ $("rk"+neg).style.background="var(--card)";$("rk"+neg).style.borderColor="var(--minus)";$("rk"+neg).innerHTML=`<b class="minus">−</b> ${MAT[neg]}`;
+ $("rk"+pos).style.borderColor="var(--plus)";$("rk"+pos).innerHTML=`<b class="plus">+</b> ${MAT[pos]}`;
+ $("r5").innerHTML=`<span class="minus">${MAT[neg]}</span> nimmt Elektronen auf und wird <b>negativ</b>. <span class="plus">${MAT[pos]}</span> gibt Elektronen ab und wird <b>positiv</b>.`;
+ S.t5[neg+"-"+pos]=1;save();const n=Object.keys(S.t5).length;$("s5").textContent=n>=3?"":`${n} von mindestens 3 Paaren getestet`;if(n>=3)mark("s5-tests");};
+upd5();
+sortTask("sort5","Wird der Körper beim Reiben negativ oder positiv?",["wird negativ","wird positiv"],[
+ {t:"Glasstab, gerieben mit einem Seidentuch",c:"wird positiv",fb:"Seide steht in der Reihe über Glas."},
+ {t:"Seidentuch, gerieben an einem Glasstab",c:"wird negativ",fb:"Seide hat die höhere Elektronenaffinität."},
+ {t:"PVC-Stab, gerieben mit Katzenfell",c:"wird negativ",fb:"PVC steht ganz oben in der Reihe."},
+ {t:"Haare, gerieben an einem Baumwoll-Pullover",c:"wird positiv",fb:"Baumwolle steht über den Haaren."},
+ {t:"Luftballon, gerieben an Papier",c:"wird negativ",fb:"Kautschuk steht über Papier."}]);
+mc("q5","Nach dem Laufen über einen Kunststoff-Teppich bekommst du an der Türklinke einen „Schlag“. Was ist passiert?",[
+ {t:"Durch Reibung der Schuhe am Teppich hast du dich aufgeladen. An der Metallklinke gleichen sich die Ladungen mit einem kleinen Funken aus.",ok:true,fb:"Das ist eine Entladung wie bei Versuch A2, nur schlagartig."},
+ {t:"In der Türklinke ist eine Batterie.",fb:"Die Klinke ist nur ein Stück Metall."},
+ {t:"Der Teppich hat dir Strom aus der Steckdose geleitet.",fb:"Der Teppich ist ein Nichtleiter und nicht angeschlossen."},
+ {t:"Die Türklinke ist magnetisch.",fb:"Mit Magnetismus hat das nichts zu tun."}]);
+
+/* ---------- Station 6: Ping-Pong ---------- */
+const c6=setupCanvas($("cv6"),640,300);let on6=false,bx=320,vx=0,q6=-1,hits=S.hits6||0;
+function step6(){const C=colors();c6.clearRect(0,0,640,300);
+ const L=150,R=490;
+ c6.fillStyle=css("metal");c6.fillRect(L-24,70,24,160);c6.fillRect(R,70,24,160);
+ if(on6){for(let i=0;i<4;i++){charge(c6,L-12,92+i*38,9,C.minus,false);charge(c6,R+12,92+i*38,9,C.plus,true);}}
+ c6.strokeStyle=C.ink;c6.lineWidth=3;c6.beginPath();c6.moveTo(L-12,230);c6.lineTo(L-12,275);c6.lineTo(300,275);c6.moveTo(340,275);c6.lineTo(R+12,275);c6.lineTo(R+12,230);c6.stroke();
+ c6.lineWidth=4;c6.beginPath();c6.moveTo(300,262);c6.lineTo(300,288);c6.stroke();c6.lineWidth=8;c6.beginPath();c6.moveTo(320,268);c6.lineTo(320,282);c6.stroke();
+ c6.fillStyle=C.minus;c6.font="bold 20px sans-serif";c6.textAlign="center";c6.fillText("−",286,268);c6.fillStyle=C.plus;c6.fillText("+",336,268);
+ c6.fillStyle=C.muted;c6.font="12px sans-serif";c6.fillText("Hochspannung",320,298);
+ if(on6){const acc=q6<0?0.18:-0.18;vx+=acc;vx*=0.995;bx+=vx;
+  if(bx>R-22){bx=R-22;vx=-1;if(q6<0){q6=1;hits++;S.hits6=hits;save();}}
+  if(bx<L+22){bx=L+22;vx=1;if(q6>0){q6=-1;hits++;S.hits6=hits;save();}}}
+ else{bx+=(320-bx)*0.05;}
+ c6.strokeStyle=C.muted;c6.lineWidth=1.5;c6.beginPath();c6.moveTo(320,20);c6.lineTo(bx,150);c6.stroke();c6.strokeStyle=C.ink;c6.lineWidth=3;c6.beginPath();c6.moveTo(270,20);c6.lineTo(370,20);c6.stroke();
+ dot(c6,bx,150,20,css("chrome"));c6.strokeStyle=C.ink;c6.lineWidth=1.5;c6.beginPath();c6.arc(bx,150,20,0,7);c6.stroke();
+ if(on6){charge(c6,bx-7,145,6,q6<0?C.minus:C.plus,q6>0);charge(c6,bx+7,155,6,q6<0?C.minus:C.plus,q6>0);}
+ if(on6){$("r6").textContent=`Ball ${q6<0?"negativ → wird nach rechts zur ⊕-Platte gezogen":"positiv → wird nach links zur ⊖-Platte gezogen"} · Anschläge: ${hits}`;if(hits>=4)mark("s6-run");}
+ $("s6").textContent=S.done["s6-run"]?"":"Lass den Ball mindestens viermal anschlagen.";}
+$("b6").onclick=()=>{on6=!on6;$("b6").textContent=on6?"Hochspannung ausschalten":"Hochspannung einschalten";if(on6){vx=-1.5;q6=-1;}else $("r6").textContent="";};
+mc("q6a","Warum kehrt der Ball an der positiven Platte um?",[
+ {t:"Bei der Berührung gibt er Elektronen ab, wird positiv und von der positiven Platte abgestoßen.",ok:true,fb:"Dann zieht ihn die negative Platte an, und alles beginnt von vorn."},
+ {t:"Er prallt nur wie ein Flummi ab.",fb:"Ein normaler Ball würde nach dem Abprallen zurückpendeln und stehen bleiben."},
+ {t:"Die Platten tauschen ihre Ladung.",fb:"Die Platten bleiben gleich geladen. Der Ball wird umgeladen."},
+ {t:"Die Nylonschnur zieht ihn zurück.",fb:"Die Schnur hält ihn nur fest."}]);
+mc("q6b","Versuch A4: Warum spreizen sich die Lametta-Streifen auf der geladenen Kugel ab?",[
+ {t:"Kugel und Streifen sind alle negativ geladen. Gleichnamige Ladungen stoßen sich ab.",ok:true,fb:"Deshalb nehmen sie einen möglichst großen Abstand ein."},
+ {t:"Die Streifen werden vom Bandgenerator weggepustet.",fb:"Es gibt keinen Luftstrom. Denk an die Ladungen."},
+ {t:"Die Streifen sind positiv, die Kugel negativ.",fb:"Dann würden sie sich anziehen und an der Kugel kleben."}]);
+
+/* ---------- Station 7 ---------- */
+sortTask("sort7","Wer war's?",["Thales","Franklin","Faraday","Morse"],[
+ {t:"geriebener Bernstein zieht Haare an (ca. 550 v. Chr.)",c:"Thales",fb:"Das ist die älteste Beobachtung. „ēlektron“ heißt Bernstein."},
+ {t:"Satz über das rechtwinklige Dreieck im Halbkreis",c:"Thales",fb:"Der Mathematiker unter den Gesuchten."},
+ {t:"Drachenexperiment im Gewitter",c:"Franklin",fb:"Er wollte zeigen, dass Blitze elektrisch sind."},
+ {t:"Erfindung des Blitzableiters",c:"Franklin",fb:"Folgt direkt aus seinem Drachenexperiment."},
+ {t:"entdeckt 1831 die Induktion",c:"Faraday",fb:"Mit einem Magnetfeld Strom erzeugen: Faraday."},
+ {t:"Käfig, in dem man vor Blitzen geschützt ist",c:"Faraday",fb:"Er trägt seinen Namen."},
+ {t:"Schreibtelegraf mit Punkten und Strichen (1844)",c:"Morse",fb:"Der Code trägt seinen Namen."}]);
+orderTask("ord7","Zeitstrahl: Bringe die Entdeckungen in die richtige Reihenfolge, von der ältesten zur neuesten.",[
+ "Thales: geriebener Bernstein zieht Haare an",
+ "Guericke: erste Elektrisiermaschine mit Schwefelkugel",
+ "du Fay: Es gibt zwei Arten von Ladung",
+ "Franklin: Einführung des Begriffs „Ladung“",
+ "Faraday: Entdeckung der Induktion",
+ "Thomson: Nachweis des Elektrons",
+ "Bohr: Elektronen umkreisen den Kern auf Bahnen"],
+ "550 v. Chr. · 1663 · 1733 · 1751 · 1831 · 1897 · 1913");
+mc("q7","Was bedeutet der Morse-Code · · ·  – – –  · · · oben?",[
+ {t:"SOS (Notruf)",ok:true,fb:"S = · · · und O = – – –. Der bekannteste Morse-Code."},
+ {t:"HALLO",fb:"Das wäre viel länger."},
+ {t:"OK",fb:"O wäre – – –, aber K ist – · –."}]);
+
+/* ---------- Station 8 ---------- */
+mc("f1","Ein Körper hat mehr Elektronen als positive Ladungen. Er ist …",[
+ {t:"negativ geladen.",ok:true,fb:"Elektronenüberschuss = negativ."},{t:"positiv geladen.",fb:"Positiv heißt Elektronenmangel."},{t:"neutral.",fb:"Neutral heißt gleich viele."}]);
+mc("f2","Was passiert beim Reiben zweier Körper aneinander?",[
+ {t:"Elektronen gehen von einem Körper auf den anderen über.",ok:true,fb:"Das ist Ladungstrennung."},
+ {t:"Es entstehen neue Ladungen.",fb:"Ladungen werden nur getrennt, nicht erzeugt."},
+ {t:"Atomkerne wandern über.",fb:"Die Kerne bleiben an ihrem Platz."}]);
+mc("f3","Zwei Körper stoßen sich ab. Was weißt du sicher?",[
+ {t:"Sie sind gleichnamig geladen.",ok:true,fb:"Beide positiv oder beide negativ."},
+ {t:"Sie sind beide negativ.",fb:"Beide positiv würden sich auch abstoßen."},
+ {t:"Sie sind ungleichnamig geladen.",fb:"Ungleichnamige Ladungen ziehen sich an."}]);
+mc("f4","Glasstab und Seidentuch werden aneinander gerieben. Welcher Körper wird negativ?",[
+ {t:"das Seidentuch",ok:true,fb:"Seide hat die höhere Elektronenaffinität als Glas."},{t:"der Glasstab",fb:"Schau in die Reihe aus Station 5."},{t:"keiner von beiden",fb:"Beim Reiben findet Ladungstrennung statt."}]);
+mc("f5","Woher kommt das Wort „Elektrizität“?",[
+ {t:"vom griechischen Wort „ēlektron“ für Bernstein",ok:true,fb:"Thales rieb Bernstein an Fell."},{t:"vom Namen des Elektrons, das 1897 entdeckt wurde",fb:"Das Wort ist viel älter als das Elektron."},{t:"vom Erfinder Elektrus",fb:"Den gab es nicht."}]);
+
+/* ---------- Schleife ---------- */
+function onStation(i){if(i===0)upd1();if(i===1){upd2();drawLamp();upd2s();}if(i===2)drawAtom();if(i===3)drawF();}
+function loop(){if(S.cur===5)step6();requestAnimationFrame(loop);}
+const mq=matchMedia("(prefers-color-scheme: dark)");const redraw=()=>onStation(S.cur);
+mq.addEventListener&&mq.addEventListener("change",redraw);
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+upd1();upd2();drawLamp();upd2s();drawAtom();drawF();go(S.cur||0);requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>
