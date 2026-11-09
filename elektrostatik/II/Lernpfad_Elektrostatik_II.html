@@ -1,0 +1,585 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lernpfad Elektrostatik II</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Layout: eine Spalte mit Stations-Leiste oben, jede Station als Karte mit Versuch/Simulation + Fragen */
+:root{
+  --paper:#eef3f8; --card:#ffffff; --ink:#15263a; --muted:#56687b; --line:#d3dde8;
+  --navy:#1a3a5c; --heading:#1a3a5c; --btn:#1a3a5c; --btn-fg:#ffffff;
+  --orange:#e36f1b; --orange-ink:#b9520c; --orange-soft:#fde9d9;
+  --minus:#2f6fd6; --plus:#d23f36; --water:#cfe9f8; --water-edge:#7fb3d6;
+  --metal:#8a96a3; --metal-dark:#5b6672; --chrome:#e9eef3; --neutral:#a9b4bf;
+  --ok:#1d8150; --ok-soft:#dff3e8; --bad:#b8332b; --bad-soft:#fbe3e1;
+  --glow:#ffd34d; --lamp:#fff6d6; --sim:#f6f9fc;
+  --head:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Verdana","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1a26; --card:#172636; --ink:#e6edf4; --muted:#9fb0c2; --line:#2a3d52;
+  --navy:#9cc3ea; --heading:#cfe2f5; --btn:#2c5a86; --btn-fg:#ffffff;
+  --orange:#f08a3e; --orange-ink:#ffae70; --orange-soft:#3a2516;
+  --minus:#6aa0ff; --plus:#ff7a6e; --water:#1d4a66; --water-edge:#4f88ad;
+  --metal:#6f7d8c; --metal-dark:#9aa7b5; --chrome:#dfe7ef; --neutral:#5e6d7c;
+  --ok:#4cc38a; --ok-soft:#15372a; --bad:#ff8a80; --bad-soft:#3d1d1b;
+  --glow:#ffd34d; --lamp:#2a3646; --sim:#122130; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1a26; --card:#172636; --ink:#e6edf4; --muted:#9fb0c2; --line:#2a3d52;
+  --navy:#9cc3ea; --heading:#cfe2f5; --btn:#2c5a86; --btn-fg:#ffffff;
+  --orange:#f08a3e; --orange-ink:#ffae70; --orange-soft:#3a2516;
+  --minus:#6aa0ff; --plus:#ff7a6e; --water:#1d4a66; --water-edge:#4f88ad;
+  --metal:#6f7d8c; --metal-dark:#9aa7b5; --chrome:#dfe7ef; --neutral:#5e6d7c;
+  --ok:#4cc38a; --ok-soft:#15372a; --bad:#ff8a80; --bad-soft:#3d1d1b;
+  --glow:#ffd34d; --lamp:#2a3646; --sim:#122130; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--head);color:var(--heading);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(1.9rem,5vw,2.6rem);font-weight:800}
+h2{font-size:clamp(1.35rem,3.6vw,1.7rem);font-weight:800}
+h3{font-size:1.08rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--head);font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-ink)}
+.top{display:flex;flex-direction:column;gap:6px}
+.top .lead{color:var(--muted);max-width:62ch}
+/* Stationsleiste */
+.steps{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.step{font:inherit;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.step b{font-family:var(--head);font-size:1.05rem;line-height:1}
+.step span{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.step.cur{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange) inset}
+.step.done{background:var(--ok-soft);border-color:var(--ok)}
+.step.done b::after{content:" ✓";color:var(--ok)}
+@media (max-width:560px){.steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--orange);width:0;transition:width .3s}
+/* Station */
+.station{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px clamp(16px,3vw,28px) 26px;display:flex;flex-direction:column;gap:16px}
+.station header{display:flex;flex-direction:column;gap:4px}
+.task{display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid var(--line)}
+.info{background:var(--orange-soft);border-left:4px solid var(--orange);border-radius:8px;padding:10px 14px}
+.safety{background:var(--bad-soft);border-left:4px solid var(--bad);border-radius:8px;padding:10px 14px}
+details{background:var(--paper);border-radius:10px;padding:10px 14px}
+details summary{cursor:pointer;font-weight:700;color:var(--heading)}
+details[open] summary{margin-bottom:6px}
+/* Fragen */
+.q{display:flex;flex-direction:column;gap:8px}
+.q .prompt{font-weight:700}
+.opts{display:grid;gap:7px}
+.opt{font:inherit;text-align:left;background:var(--paper);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:9px 13px;cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--orange)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);text-decoration:line-through;opacity:.85}
+.opt:disabled{cursor:default}
+.fb{padding:9px 13px;border-radius:8px}
+.fb.ok{background:var(--ok-soft);border-left:4px solid var(--ok)}
+.fb.no{background:var(--bad-soft);border-left:4px solid var(--bad)}
+.chk{display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:9px 13px;cursor:pointer}
+.chk input{width:20px;height:20px;margin-top:2px;accent-color:var(--orange);flex:none}
+.chk.right{background:var(--ok-soft);border-color:var(--ok)}
+.chk.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.sort{display:grid;gap:7px}
+.srow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px 8px 13px}
+.srow > span{flex:1 1 220px;min-width:0}
+.srow .bt{display:flex;gap:6px;flex-wrap:wrap}
+.srow.right{background:var(--ok-soft);border-color:var(--ok)}
+.srow.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.btn{font:inherit;font-weight:700;background:var(--btn);color:var(--btn-fg);border:0;border-radius:10px;padding:9px 16px;cursor:pointer}
+.btn.orange{background:var(--orange);color:#fff}
+.btn.soft{background:var(--paper);color:var(--ink);border:1.5px solid var(--line)}
+.btn.sel{background:var(--orange);color:#fff;border-color:var(--orange)}
+.btn.small{padding:6px 11px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.opt:focus-visible,.step:focus-visible,.chk:focus-within{outline:3px solid var(--orange);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.status{font-size:.95rem;color:var(--muted)}
+.status.done{color:var(--ok);font-weight:700}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+/* Simulationen */
+.sim{background:var(--sim);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sim canvas,.sim svg{width:100%;height:auto;display:block;max-width:100%}
+.sim .readout{font-family:var(--head);font-weight:600;color:var(--heading)}
+.split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:640px){.split{grid-template-columns:1fr}}
+.log{width:100%;border-collapse:collapse;font-size:.92rem}
+.log th,.log td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+.log th{color:var(--muted);font-weight:700}
+.tbl{overflow-x:auto}
+.tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.82rem;font-weight:700}
+.tag.y{background:var(--ok-soft);color:var(--ok)} .tag.n{background:var(--bad-soft);color:var(--bad)}
+.photo{border-radius:12px;border:1px solid var(--line);width:140px;max-width:100%;aspect-ratio:1;object-fit:cover}
+input[type=range]{width:100%;accent-color:var(--orange)}
+.summary{background:var(--ok-soft);border:1.5px solid var(--ok);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.summary ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.minus{color:var(--minus);font-weight:700}.plus{color:var(--plus);font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <span class="eyebrow">Physik · Klasse 9 · Lernpfad</span>
+    <h1>Elektrostatik II</h1>
+    <p class="lead">Anwendungen und Beispiele: Elektroskop, Laserdrucker, Lackieren und Gewitter. Arbeite die acht Stationen der Reihe nach durch. Eine Station ist geschafft, wenn alle Aufgaben darin grün sind.</p>
+  </div>
+  <nav class="steps" id="steps" aria-label="Stationen"></nav>
+  <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+
+  <!-- 1 -->
+  <section class="station" data-st="0">
+    <header><span class="eyebrow">Station 1 · Beispiel 1</span><h2>Das Elektroskop</h2></header>
+    <div class="split">
+      <div class="sim"><svg id="esk1" viewBox="0 0 260 260" role="img" aria-label="Aufbau eines Elektroskops mit Beschriftung"></svg></div>
+      <div class="info"><b>Nachweisgerät für Ladungen:</b> Berührfläche, Träger und Zeiger sind aus Metall und leitend miteinander verbunden. Das Gehäuse ist dazu durch einen <b>Isolator</b> getrennt. Der Zeiger ist drehbar gelagert.</div>
+    </div>
+    <div class="task" id="sort1"></div>
+    <div class="task" id="q1"></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="station" data-st="1" hidden>
+    <header><span class="eyebrow">Station 2 · Versuch</span><h2>Das Elektroskop ausprobieren</h2></header>
+    <p>Berühre die Berührfläche mit geladenen Körpern. Beobachte die Ladungen und den Zeiger. Probiere danach den echten Versuch mit einem Luftballon aus und protokolliere ihn auf dem Arbeitsbogen.</p>
+    <div class="sim">
+      <svg id="esk2" viewBox="0 0 320 260" role="img" aria-label="Elektroskop mit Zeigerausschlag"></svg>
+      <div class="row"><button class="btn soft small" id="e2n">Mit geriebenem Ballon (−) berühren</button><button class="btn soft small" id="e2p">Mit geriebenem Glasstab (+) berühren</button><button class="btn orange small" id="e2g">Mit dem Finger berühren</button></div>
+      <div class="readout" id="r2">Das Elektroskop ist neutral. Der Zeiger hängt senkrecht.</div>
+    </div>
+    <p class="status" id="s2"></p>
+    <div class="task" id="q2a"></div>
+    <div class="task" id="q2b"></div>
+    <div class="task" id="q2c"></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="station" data-st="2" hidden>
+    <header><span class="eyebrow">Station 3 · Beispiel 2 (schwer!)</span><h2>Der Laserdrucker</h2></header>
+    <div class="info">Auf dem Arbeitsbogen erklärst du <b>entweder</b> den Laserdrucker <b>oder</b> das elektrostatische Lackieren ausführlich. Hier schaust du dir beide kurz an. Die Animation zum Laserdrucker findest du in der IServ-Wolke.</div>
+    <div class="sim">
+      <svg id="laser" viewBox="0 0 360 240" role="img" aria-label="Bildtrommel eines Laserdruckers mit Ladungen"></svg>
+      <div class="row"><button class="btn orange" id="b3">Nächster Schritt</button><button class="btn soft small" id="b3r">Von vorn</button></div>
+      <div class="readout" id="r3"></div>
+    </div>
+    <p class="status" id="s3"></p>
+    <div class="task" id="ord3"></div>
+    <div class="task" id="q3"></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="station" data-st="3" hidden>
+    <header><span class="eyebrow">Station 4 · Beispiel 3 (leichter!)</span><h2>Elektrostatisches Lackieren</h2></header>
+    <p>Die Sprühpistole zerstäubt Lack auf ein Werkstück aus Metall. Lackiere einmal <b>ohne</b> und einmal <b>mit</b> Hochspannung und vergleiche, wie viel Lack ankommt.</p>
+    <div class="sim">
+      <canvas id="cv4" aria-label="Lacktröpfchen fliegen zum Werkstück"></canvas>
+      <div class="row"><button class="btn soft small" id="hv4">Hochspannung: aus</button><button class="btn orange" id="b4">Sprühen</button></div>
+      <div class="readout" id="r4">Wähle, ob die Hochspannung an ist, und sprühe.</div>
+    </div>
+    <p class="status" id="s4"></p>
+    <div class="task" id="q4"></div>
+    <div class="task" id="m4"></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="station" data-st="4" hidden>
+    <header><span class="eyebrow">Station 5 · Beispiel 4</span><h2>Wie entsteht ein Blitz?</h2></header>
+    <p>In einer Gewitterwolke gibt es starke <b>Aufwinde</b> mit Regentropfen und <b>Abwinde</b> mit Eiskristallen. Starte die Winde und beobachte, wo sich die Ladungen sammeln. Den kurzen Film dazu findest du in der IServ-Wolke.</p>
+    <div class="sim">
+      <canvas id="cv5" aria-label="Gewitterwolke mit Ladungstrennung"></canvas>
+      <div class="row"><button class="btn orange" id="b5">Winde starten</button><span class="readout" id="r5"></span></div>
+    </div>
+    <p class="status" id="s5"></p>
+    <div class="task" id="sort5"></div>
+    <div class="task" id="ord5"></div>
+  </section>
+
+  <!-- 6 -->
+  <section class="station" data-st="5" hidden>
+    <header><span class="eyebrow">Station 6 · Weiterdenken</span><h2>Donner und Abstand</h2></header>
+    <p>Der Blitz erhitzt die Luft auf bis zu 30 000 °C. Sie dehnt sich explosionsartig aus: Es knallt. Licht ist fast sofort bei dir, der Schall braucht für <b>1 km etwa 3 Sekunden</b>.</p>
+    <div class="sim">
+      <svg id="storm" viewBox="0 0 320 120" role="img" aria-label="Blitz und Stoppuhr"></svg>
+      <div class="row"><button class="btn orange" id="b6">Blitz!</button><span class="readout" id="r6">Drücke auf „Blitz!“ und zähle die Sekunden bis zum Donner.</span></div>
+    </div>
+    <div class="task" id="n6"></div>
+    <div class="task" id="q6"></div>
+    <div class="task" id="m6"></div>
+    <div class="safety"><b>Bei Gewitter:</b> Suche Schutz in einem Gebäude oder Auto. Meide einzelne Bäume, Wasser, Hügel und freie Flächen.</div>
+  </section>
+
+  <!-- 7 -->
+  <section class="station" data-st="6" hidden>
+    <header><span class="eyebrow">Station 7 · Beispiel 5</span><h2>Was hält ein Atom zusammen?</h2></header>
+    <div class="split">
+      <div class="sim"><svg id="atom7" viewBox="0 0 240 240" role="img" aria-label="Atom mit Kraftpfeilen zwischen Kern und Elektronen"></svg>
+        <div class="row"><button class="btn soft small" id="b7">Kraftpfeile zeigen</button></div></div>
+      <div class="info">Der Atomkern ist <b>positiv</b> geladen, die Elektronen in der Atomhülle sind <b>negativ</b>. Warum fliegen die Elektronen nicht einfach weg?</div>
+    </div>
+    <div class="task" id="q7"></div>
+    <div class="task" id="sort7"></div>
+  </section>
+
+  <!-- 8 -->
+  <section class="station" data-st="7" hidden>
+    <header><span class="eyebrow">Station 8 · Abschluss</span><h2>Kannst du es?</h2></header>
+    <p>Richtig oder falsch? Aussagen aus Elektrostatik I und II.</p>
+    <div class="task" id="f1"></div>
+    <div class="task" id="f2"></div>
+    <div class="summary" id="summary" hidden>
+      <h3>Geschafft! Das hast du gelernt</h3>
+      <ul>
+        <li>Das <b>Elektroskop</b> weist Ladungen nach: Träger und Zeiger werden gleichnamig geladen und stoßen sich ab. Die Art der Ladung zeigt es nicht.</li>
+        <li>Beim <b>Laserdrucker</b> neutralisiert der Laser Stellen auf der negativ geladenen Bildtrommel. Nur dort haftet der negative Toner.</li>
+        <li>Beim <b>elektrostatischen Lackieren</b> werden Lack und Werkstück ungleichnamig geladen. Der Lack wird angezogen, sogar auf die Rückseite.</li>
+        <li>In der <b>Gewitterwolke</b> reiben Regentropfen und Eiskristalle aneinander: Ladungstrennung. Der <b>Blitz</b> ist die Entladung, der <b>Donner</b> die explosionsartig ausgedehnte Luft.</li>
+        <li>Ein <b>Atom</b> hält zusammen, weil sich der positive Kern und die negativen Elektronen anziehen.</li>
+      </ul>
+      <p class="status">Zeige diese Übersicht deiner Lehrkraft.</p>
+    </div>
+    <p class="status" id="missing"></p>
+  </section>
+
+  <div class="nav">
+    <button class="btn soft" id="prev">← Zurück</button>
+    <button class="btn" id="next">Weiter →</button>
+  </div>
+</div>
+
+<script>
+(function(){
+const KEY="lernpfad-elektrostatik2";
+const STATIONS=[
+ {name:"Elektroskop",req:["sort1","q1"]},
+ {name:"Versuch",req:["s2-neg","s2-pos","s2-gnd","q2a","q2b","q2c"]},
+ {name:"Laser",req:["s3-run","ord3","q3"]},
+ {name:"Lackieren",req:["s4-off","s4-on","q4","m4"]},
+ {name:"Gewitter",req:["s5-flash","sort5","ord5"]},
+ {name:"Donner",req:["n6","q6","m6"]},
+ {name:"Atom",req:["s7-arr","q7","sort7"]},
+ {name:"Abschluss",req:["f1","f2"]}
+];
+/* ---------- Grundgerüst (wie Lernpfad Elektrostatik V) ---------- */
+const S={done:{},cur:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object"){Object.assign(S,s);}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const $=id=>document.getElementById(id);
+const el=(t,cls,html)=>{const e=document.createElement(t);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim();
+const N=STATIONS.length;
+const complete=i=>STATIONS[i].req.every(r=>S.done[r]);
+function mark(id){if(!S.done[id]){S.done[id]=true;save();}refresh();}
+
+/* ---------- Navigation ---------- */
+const stepsEl=$("steps");
+STATIONS.forEach((s,i)=>{const b=el("button","step",`<b>${i+1}</b><span>${s.name}</span>`);b.type="button";b.onclick=()=>go(i);b.setAttribute("aria-label",`Station ${i+1}: ${s.name}`);stepsEl.appendChild(b);});
+function go(i){S.cur=Math.max(0,Math.min(N-1,i));save();
+ document.querySelectorAll(".station").forEach(s=>s.hidden=+s.dataset.st!==S.cur);refresh();
+ if(typeof onStation==="function")onStation(S.cur);
+ window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});}
+$("prev").onclick=()=>go(S.cur-1);$("next").onclick=()=>go(S.cur+1);
+function refresh(){
+ let n=0;[...stepsEl.children].forEach((b,i)=>{const d=complete(i);if(d)n++;b.classList.toggle("done",d);b.classList.toggle("cur",i===S.cur);b.setAttribute("aria-current",i===S.cur?"step":"false");});
+ $("barfill").style.width=(n/N*100)+"%";
+ $("prev").disabled=S.cur===0;$("next").disabled=S.cur===N-1;
+ const allPrev=[...Array(N-1).keys()].every(complete);
+ $("summary").hidden=!(complete(N-1)&&allPrev);
+ const miss=STATIONS.map((s,i)=>complete(i)?null:i+1).filter(Boolean);
+ $("missing").textContent=complete(N-1)&&!allPrev?`Noch offen: Station ${miss.join(", ")}. Dann erscheint deine Übersicht.`:"";
+}
+
+/* ---------- Aufgabentypen ---------- */
+function mc(id,prompt,opts){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","opts"),fb=el("p","fb");fb.hidden=true;
+ shuffle(opts).forEach(o=>{const b=el("button","opt",o.t);b.type="button";
+  b.onclick=()=>{fb.hidden=false;
+   if(o.ok){b.classList.add("right");[...list.children].forEach(x=>x.disabled=true);fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+(o.fb||"");mark(id);}
+   else{b.classList.add("wrong");b.disabled=true;fb.className="fb no";fb.innerHTML="<b>Nicht ganz.</b> "+(o.fb||"Versuch es noch einmal.");}};
+  if(S.done[id]){b.disabled=true;if(o.ok){b.classList.add("right");fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+(o.fb||"");}}
+  list.appendChild(b);});
+ q.append(list,fb);box.appendChild(q);
+}
+function sortTask(id,prompt,cats,items){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","sort"),fb=el("p","fb");fb.hidden=true;
+ const check=()=>{if(items.every((_,i)=>S.done[id+":"+i])){fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Alles richtig zugeordnet.</b>";mark(id);}};
+ shuffle(items.map((it,i)=>({...it,i}))).forEach(it=>{
+  const r=el("div","srow"),lab=el("span",null,it.t),bt=el("div","bt");
+  cats.forEach(c=>{const b=el("button","btn soft small",c);b.type="button";
+   b.onclick=()=>{if(c===it.c){r.classList.add("right");[...bt.children].forEach(x=>x.disabled=true);b.classList.add("sel");S.done[id+":"+it.i]=true;save();fb.hidden=true;check();}
+    else{r.classList.remove("shake");void r.offsetWidth;r.classList.add("shake");fb.hidden=false;fb.className="fb no";fb.innerHTML="<b>Nicht ganz:</b> "+(it.fb||"Überlege noch einmal.");}};
+   if(S.done[id+":"+it.i]){b.disabled=true;if(c===it.c)b.classList.add("sel");}
+   bt.appendChild(b);});
+  if(S.done[id+":"+it.i])r.classList.add("right");
+  r.append(lab,bt);list.appendChild(r);});
+ q.append(list,fb);box.appendChild(q);check();
+}
+function multi(id,prompt,opts,okText){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","opts"),fb=el("p","fb");fb.hidden=true;
+ const rows=shuffle(opts).map((o,k)=>{const l=el("label","chk");const c=document.createElement("input");c.type="checkbox";c.id=id+"-c"+k;
+  l.append(c,el("span",null,o.t));list.appendChild(l);if(S.done[id]&&o.ok){c.checked=true;l.classList.add("right");}if(S.done[id])c.disabled=true;return{o,c,l};});
+ const btn=el("button","btn","Prüfen");btn.type="button";
+ btn.onclick=()=>{let right=0,wrong=0,need=0;rows.forEach(r=>{r.l.classList.remove("right","wrong");if(r.o.ok)need++;
+   if(r.c.checked&&r.o.ok){right++;r.l.classList.add("right");}else if(r.c.checked&&!r.o.ok){wrong++;r.l.classList.add("wrong");}});
+  fb.hidden=false;
+  if(right===need&&wrong===0){fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;rows.forEach(r=>r.c.disabled=true);btn.disabled=true;mark(id);}
+  else{fb.className="fb no";fb.innerHTML=`<b>Noch nicht.</b> ${right} von ${need} richtigen gefunden`+(wrong?`, ${wrong} falsch angekreuzt (rot).`:".");}};
+ if(S.done[id]){btn.disabled=true;fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;}
+ q.append(list,btn,fb);box.appendChild(q);
+}
+/* Reihenfolge: Schritte in der richtigen Reihenfolge anklicken */
+function orderTask(id,prompt,steps,okText){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const list=el("div","sort"),fb=el("p","fb");fb.hidden=true;let next=0;
+ const rows=shuffle(steps.map((t,i)=>({t,i}))).map(s=>{
+  const r=el("div","srow"),num=el("b",null,""),lab=el("span",null,s.t);num.style.minWidth="1.6em";num.style.color="var(--ok)";
+  r.style.cursor="pointer";r.tabIndex=0;r.setAttribute("role","button");
+  const pick=()=>{if(S.done[id]||r.classList.contains("right"))return;
+   if(s.i===next){r.classList.add("right");num.textContent=(next+1)+".";next++;fb.hidden=true;
+    if(next===steps.length){fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtige Reihenfolge.</b> "+(okText||"");mark(id);}}
+   else{r.classList.remove("shake");void r.offsetWidth;r.classList.add("shake");fb.hidden=false;fb.className="fb no";fb.innerHTML=`<b>Nicht ganz:</b> Das ist nicht Schritt ${next+1}. Überlege, was davor passieren muss.`;}};
+  r.onclick=pick;r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};
+  if(S.done[id]){r.classList.add("right");num.textContent=(s.i+1)+".";}
+  r.style.justifyContent="flex-start";r.append(num,lab);list.appendChild(r);return r;});
+ if(S.done[id]){fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtige Reihenfolge.</b> "+(okText||"");
+  rows.sort((a,b)=>parseInt(a.firstChild.textContent)-parseInt(b.firstChild.textContent)).forEach(r=>list.appendChild(r));}
+ q.append(el("p","status","Klicke die Schritte nacheinander in der richtigen Reihenfolge an."),list,fb);box.appendChild(q);
+}
+/* Zahl eingeben */
+function numTask(id,prompt,answer,tol,unit,okText,hint){
+ const box=$(id),q=el("div","q");q.appendChild(el("p","prompt",prompt));
+ const row=el("div","row"),inp=document.createElement("input");inp.type="text";inp.inputMode="decimal";inp.className="opt";inp.style.maxWidth="9em";inp.setAttribute("aria-label","Antwort");
+ const btn=el("button","btn","Prüfen"),fb=el("p","fb");btn.type="button";fb.hidden=true;
+ btn.onclick=()=>{const v=parseFloat(inp.value.replace(",","."));fb.hidden=false;
+  if(!isNaN(v)&&Math.abs(v-answer)<=tol){fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;inp.disabled=true;btn.disabled=true;mark(id);}
+  else{fb.className="fb no";fb.innerHTML="<b>Nicht ganz.</b> "+hint;}};
+ if(S.done[id]){inp.value=String(answer).replace(".",",");inp.disabled=true;btn.disabled=true;fb.hidden=false;fb.className="fb ok";fb.innerHTML="<b>Richtig.</b> "+okText;}
+ row.append(inp,el("span",null,unit),btn);q.append(row,fb);box.appendChild(q);
+}
+
+/* ---------- Canvas-Hilfe ---------- */
+function setupCanvas(cv,W,H){if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h){this.rect(x,y,w,h);};const d=Math.min(window.devicePixelRatio||1,2);cv.width=W*d;cv.height=H*d;cv.style.aspectRatio=W+"/"+H;const c=cv.getContext("2d");c.setTransform(d,0,0,d,0,0);return c;}
+function dot(c,x,y,r,f){c.fillStyle=f;c.beginPath();c.arc(x,y,r,0,7);c.fill();}
+function charge(c,x,y,r,col,plus){dot(c,x,y,r,col);c.strokeStyle="#fff";c.lineWidth=Math.max(1.5,r*0.28);c.beginPath();c.moveTo(x-r*.5,y);c.lineTo(x+r*.5,y);if(plus){c.moveTo(x,y-r*.5);c.lineTo(x,y+r*.5);}c.stroke();}
+function arrow(c,x1,y1,x2,y2,col,w){c.strokeStyle=col;c.fillStyle=col;c.lineWidth=w||3;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+ const a=Math.atan2(y2-y1,x2-x1),h=10;c.beginPath();c.moveTo(x2+Math.cos(a)*2,y2+Math.sin(a)*2);c.lineTo(x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45));c.lineTo(x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45));c.fill();}
+const svgCharge=(x,y,r,plus)=>`<circle cx="${x}" cy="${y}" r="${r}" style="fill:var(${plus?"--plus":"--minus"})"/><path d="M${x-r*.5} ${y}H${x+r*.5}${plus?`M${x} ${y-r*.5}V${y+r*.5}`:""}" stroke="#fff" stroke-width="${Math.max(1.5,r*.28)}"/>`;
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+
+/* ---------- Elektroskop zeichnen ---------- */
+function eskop(q,labels){const ink=css("ink"),mu=css("muted");const ang=Math.min(Math.abs(q)*8,50);const cx=130,cy=140;
+ const plus=q>0,n=Math.min(Math.abs(q),6);
+ const rad=a=>a*Math.PI/180,px=Math.sin(rad(ang)),py=Math.cos(rad(ang));
+ let h=`<circle cx="${cx}" cy="${cy}" r="82" style="fill:var(--card)" stroke="${ink}" stroke-width="3"/>
+ <rect x="${cx-8}" y="${cy+82}" width="16" height="16" style="fill:var(--metal)"/><rect x="${cx-40}" y="${cy+96}" width="80" height="12" style="fill:var(--metal)"/>
+ <rect x="${cx-40}" y="22" width="80" height="10" style="fill:var(--metal-dark)"/>
+ <rect x="${cx-4}" y="32" width="8" height="${cy-32}" style="fill:var(--metal)"/>
+ <rect x="${cx-12}" y="${cy-88}" width="24" height="12" style="fill:${ink}"/>
+ <rect x="${cx-4}" y="${cy-4}" width="8" height="70" style="fill:var(--metal)"/>
+ <g transform="rotate(${ang} ${cx} ${cy})"><rect x="${cx+3}" y="${cy-55}" width="7" height="110" rx="2" style="fill:var(--neutral)" stroke="${mu}" stroke-width="1"/></g>
+ <circle cx="${cx}" cy="${cy}" r="3.5" fill="${ink}"/>`;
+ if(n){const spots=[[cx-25,27],[cx+25,27],[cx,70],[cx,110],[cx,175],[cx,195]];
+  for(let i=0;i<n;i++){const s=spots[i];h+=svgCharge(s[0],s[1],7,plus);}
+  for(let i=0;i<Math.min(n,3);i++){const t=-40+i*40;h+=svgCharge((cx+6.5+px*t).toFixed(1),(cy+py*t).toFixed(1),6,plus);}}
+ if(labels){const L=(x,y,t,x2,y2,a)=>`<line x1="${x2}" y1="${y2}" x2="${a[0]}" y2="${a[1]}" stroke="${mu}" stroke-width="1.2"/><text x="${x}" y="${y}" font-size="12" style="fill:var(--ink);font-family:var(--body)">${t}</text>`;
+  h+=L(cx-40,14,"Berührfläche",cx,16,[cx,22])+L(178,44,"Isolator",176,48,[cx+12,cy-82])+L(6,92,"Träger",50,96,[cx-4,110])+L(206,112,"Zeiger",206,116,[cx+12,cy-30])+L(6,230,"Gehäuse",46,226,[78,204]);}
+ return h;}
+$("esk1").innerHTML=eskop(0,true);
+sortTask("sort1","Ist das Teil leitend oder isolierend?",["leitend (Metall)","isolierend"],[
+ {t:"Berührfläche",c:"leitend (Metall)",fb:"Hier sollen die Ladungen hineinfließen."},
+ {t:"Träger",c:"leitend (Metall)",fb:"Die Ladungen müssen bis zum Zeiger gelangen."},
+ {t:"Zeiger",c:"leitend (Metall)",fb:"Der Zeiger muss die gleiche Ladung wie der Träger bekommen."},
+ {t:"Isolator zwischen Träger und Gehäuse",c:"isolierend",fb:"Der Name verrät es schon."}]);
+mc("q1","Warum ist das Gehäuse vom Träger isoliert?",[
+ {t:"Sonst würden die Ladungen über das Gehäuse abfließen und der Zeiger könnte nicht ausschlagen.",ok:true,fb:"Die Ladung muss auf Träger und Zeiger bleiben."},
+ {t:"Damit das Elektroskop leichter ist.",fb:"Es geht um die Ladungen, nicht ums Gewicht."},
+ {t:"Damit man es nicht sieht.",fb:"Das Gehäuse hat ein Sichtfenster."}]);
+
+/* ---------- Station 2 ---------- */
+let q2=S.q2||0;
+function upd2(){$("esk2").innerHTML=`<g transform="translate(30,0)">${eskop(q2,false)}</g>`;
+ $("r2").innerHTML=q2===0?"Das Elektroskop ist neutral. Der Zeiger hängt senkrecht.":`Träger und Zeiger sind <b>${q2<0?"negativ":"positiv"}</b> geladen und stoßen sich ab. Ausschlag: ${Math.min(Math.abs(q2)*8,50)}°`;
+ const t=[];if(!S.done["s2-neg"])t.push("Ballon");if(!S.done["s2-pos"])t.push("Glasstab");if(!S.done["s2-gnd"])t.push("Finger");$("s2").textContent=t.length?"Noch ausprobieren: "+t.join(", "):"";}
+$("e2n").onclick=()=>{q2=Math.max(-6,q2-2);S.q2=q2;save();if(q2<0)mark("s2-neg");upd2();};
+$("e2p").onclick=()=>{q2=Math.min(6,q2+2);S.q2=q2;save();if(q2>0)mark("s2-pos");upd2();};
+$("e2g").onclick=()=>{if(q2!==0)mark("s2-gnd");q2=0;S.q2=0;save();upd2();$("r2").innerHTML="Die Ladungen fließen über deinen Körper ab: Das Elektroskop ist <b>entladen</b>.";};
+mc("q2a","Warum schlägt der Zeiger aus, wenn du die Berührfläche mit dem negativen Ballon berührst?",[
+ {t:"Elektronen gehen auf Träger und Zeiger über. Beide sind negativ und stoßen sich ab.",ok:true,fb:"Gleichnamige Ladungen stoßen sich ab."},
+ {t:"Der Ballon zieht den Zeiger an.",fb:"Der Zeiger dreht sich auch, wenn der Ballon schon weg ist."},
+ {t:"Träger und Zeiger werden ungleichnamig geladen.",fb:"Dann würden sie sich anziehen."}]);
+mc("q2b","Kann man am Ausschlag erkennen, ob ein Körper positiv oder negativ geladen ist?",[
+ {t:"Nein. Der Zeiger schlägt bei beiden Ladungsarten aus.",ok:true,fb:"Die Art der Ladung zeigt dir die Glimmlampe aus Elektrostatik I."},
+ {t:"Ja, bei negativer Ladung schlägt er nach rechts aus.",fb:"Probiere es in der Simulation: Er schlägt immer in dieselbe Richtung aus."},
+ {t:"Ja, bei positiver Ladung schlägt er gar nicht aus.",fb:"Teste den Glasstab."}]);
+mc("q2c","Was bedeutet ein größerer Zeigerausschlag?",[
+ {t:"Auf dem Elektroskop ist mehr Ladung.",ok:true,fb:"Mehr Ladung, stärkere Abstoßung."},{t:"Die Ladung ist positiv.",fb:"Die Art der Ladung zeigt das Elektroskop nicht."},{t:"Das Elektroskop ist kaputt.",fb:"Nein, so funktioniert es."}]);
+
+/* ---------- Station 3: Laserdrucker ---------- */
+const L3=["Die Bildtrommel ist noch neutral.",
+ "1. Die Bildtrommel rotiert und wird durch die Aufladerolle <b>negativ</b> aufgeladen.",
+ "2. Der Laserstrahl fährt zeilenweise über die Trommel und <b>neutralisiert</b> die Stellen, an denen später Toner haften soll.",
+ "3. Die Trommel läuft am negativen Toner vorbei. Der Toner wird von den negativen Stellen <b>abgestoßen</b> und haftet nur an den neutralen Stellen.",
+ "4. Ladungen und Toner werden auf das Papier abgewalzt. Danach wird das Papier entladen und der Toner mit Druck und Hitze fixiert."];
+let k3=0;
+function draw3(){const ink=css("ink"),mu=css("muted"),cx=160,cy=120,R=70;let h=`<circle cx="${cx}" cy="${cy}" r="${R}" style="fill:var(--chrome)" stroke="${ink}" stroke-width="2"/>
+ <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="12" style="fill:var(--muted);font-family:var(--body)">Bildtrommel</text>`;
+ const img=[0,1,1,0,1,1,0,0,1,1,0,1];
+ for(let i=0;i<12;i++){const a=-Math.PI/2+i*Math.PI/6,x=cx+(R-12)*Math.cos(a),y=cy+(R-12)*Math.sin(a);
+  if(k3>=1&&!(k3>=2&&img[i]))h+=svgCharge(x.toFixed(1),y.toFixed(1),8,false);
+  if(k3>=3&&img[i])h+=`<circle cx="${(cx+(R+4)*Math.cos(a)).toFixed(1)}" cy="${(cy+(R+4)*Math.sin(a)).toFixed(1)}" r="6" fill="${ink}"/>`;}
+ if(k3===2)h+=`<rect x="300" y="20" width="44" height="22" fill="#d6332b" transform="rotate(-20 322 31)"/><line x1="300" y1="40" x2="${cx+50}" y2="${cy-50}" stroke="#d6332b" stroke-width="2.5"/>`;
+ h+=`<circle cx="255" cy="45" r="20" style="fill:var(--chrome)" stroke="${mu}"/>${svgCharge(250,40,6,false)}${svgCharge(262,50,6,false)}<text x="255" y="78" text-anchor="middle" font-size="10" style="fill:var(--muted);font-family:var(--body)">Aufladerolle</text>`;
+ h+=`<rect x="30" y="100" width="44" height="40" style="fill:var(--metal)"/>${svgCharge(44,113,6,false)}${svgCharge(60,127,6,false)}<text x="52" y="156" text-anchor="middle" font-size="10" style="fill:var(--muted);font-family:var(--body)">Toner</text>`;
+ if(k3>=4){h+=`<rect x="90" y="208" width="180" height="16" style="fill:var(--card)" stroke="${mu}"/>`;img.forEach((v,i)=>{if(v)h+=`<rect x="${100+i*14}" y="211" width="9" height="10" fill="${ink}"/>`;});h+=`<text x="280" y="221" font-size="10" style="fill:var(--muted);font-family:var(--body)">Papier</text>`;}
+ $("laser").innerHTML=h;$("r3").innerHTML=L3[k3];$("b3").disabled=k3>=4;if(k3>=4)mark("s3-run");
+ $("s3").textContent=S.done["s3-run"]?"":"Gehe alle Schritte durch.";}
+$("b3").onclick=()=>{k3=Math.min(4,k3+1);draw3();};$("b3r").onclick=()=>{k3=0;draw3();};
+orderTask("ord3","Bringe die Arbeitsschritte des Laserdruckers in die richtige Reihenfolge.",[
+ "Die Bildtrommel wird durch die Aufladerolle negativ aufgeladen.",
+ "Der Laserstrahl neutralisiert die Stellen, an denen Toner haften soll.",
+ "Der negative Toner haftet nur an den neutralisierten Stellen.",
+ "Ladungen und Toner werden auf das Papier abgewalzt.",
+ "Das Papier wird durch die Entladungseinheit entladen.",
+ "Der Toner wird durch Druck und Hitze fixiert."],"Die Reinigungswalze entfernt danach übrigen Toner von der Trommel.");
+mc("q3","Warum haftet der Toner nicht an den Stellen, die der Laser nicht getroffen hat?",[
+ {t:"Diese Stellen sind negativ, der Toner auch. Gleichnamige Ladungen stoßen sich ab.",ok:true,fb:"Nur die neutralen Stellen nehmen Toner an."},
+ {t:"Der Laser macht die Stellen klebrig.",fb:"Der Laser verändert nur die Ladung."},
+ {t:"Diese Stellen sind positiv und stoßen den Toner ab.",fb:"Sie sind negativ. Positive Stellen würden den Toner anziehen."}]);
+
+/* ---------- Station 4: Lackieren ---------- */
+const c4=setupCanvas($("cv4"),640,300);let hv=false,drops=[],spraying=0,hit=0,tot=0;
+function step4(){const C={ink:css("ink"),plus:css("plus"),minus:css("minus"),muted:css("muted"),metal:css("metal"),md:css("metal-dark"),or:css("orange")};
+ c4.clearRect(0,0,640,300);
+ const W={x:440,y:70,w:40,h:160};
+ c4.fillStyle=C.metal;c4.fillRect(W.x,W.y,W.w,W.h);
+ if(hv)for(let i=0;i<5;i++)charge(c4,W.x+20,W.y+18+i*31,8,C.plus,true);
+ c4.fillStyle=C.md;c4.beginPath();c4.moveTo(60,140);c4.lineTo(140,140);c4.lineTo(140,160);c4.lineTo(100,160);c4.lineTo(85,200);c4.lineTo(68,200);c4.lineTo(80,160);c4.lineTo(60,160);c4.fill();
+ c4.fillStyle=C.muted;c4.font="12px sans-serif";c4.textAlign="center";c4.fillText("Sprühpistole",100,220);c4.fillText("Werkstück",W.x+20,W.y+W.h+18);
+ if(hv){c4.fillText("Hochspannung an",320,290);}
+ if(spraying>0){spraying--;for(let i=0;i<2;i++){tot++;drops.push({x:145,y:150,vx:3+Math.random()*1.5,vy:(Math.random()-.5)*3.2,done:false});}}
+ drops.forEach(d=>{if(d.done)return;
+  if(hv){const tx=Math.min(Math.max(d.x,W.x),W.x+W.w),ty=Math.min(Math.max(d.y,W.y),W.y+W.h);const dx=tx-d.x,dy=ty-d.y,r=Math.hypot(dx,dy)+1;d.vx+=dx/r*0.22;d.vy+=dy/r*0.22;const v=Math.hypot(d.vx,d.vy);if(v>5){d.vx*=5/v;d.vy*=5/v;}}
+  d.x+=d.vx;d.y+=d.vy;
+  if(d.x>W.x-3&&d.x<W.x+W.w+3&&d.y>W.y-3&&d.y<W.y+W.h+3){d.done=true;d.stuck=true;hit++;}
+  if(d.x>650||d.y<-10||d.y>310)d.done=true;});
+ drops=drops.filter(d=>!d.done||d.stuck).slice(-400);
+ drops.forEach(d=>{if(d.stuck)dot(c4,d.x,d.y,3,C.or);else if(hv)charge(c4,d.x,d.y,4.5,C.minus,false);else dot(c4,d.x,d.y,3,C.or);});
+ if(tot>0){const p=Math.round(hit/tot*100);$("r4").innerHTML=`Hochspannung ${hv?"an":"aus"}: <b>${p} %</b> des Lacks treffen das Werkstück.`+(hv?" Die negativen Tröpfchen werden vom positiven Werkstück angezogen, auch die, die eigentlich daneben fliegen würden.":" Viele Tröpfchen fliegen daneben.");
+  if(spraying===0&&tot>=120){mark(hv?"s4-on":"s4-off");}}
+ const t=[];if(!S.done["s4-off"])t.push("ohne Hochspannung");if(!S.done["s4-on"])t.push("mit Hochspannung");$("s4").textContent=t.length?"Noch sprühen: "+t.join(" und "):"";}
+$("hv4").onclick=()=>{hv=!hv;drops=[];hit=0;tot=0;$("hv4").textContent="Hochspannung: "+(hv?"an":"aus");$("hv4").classList.toggle("sel",hv);};
+$("b4").onclick=()=>{drops=[];hit=0;tot=0;spraying=70;};
+mc("q4","Warum fliegen die Lacktröpfchen mit Hochspannung zum Werkstück?",[
+ {t:"Die Tröpfchen sind negativ, das Werkstück positiv. Ungleichnamige Ladungen ziehen sich an.",ok:true,fb:"Auf dem Werkstück werden die Tröpfchen dann neutralisiert."},
+ {t:"Die Hochspannung bläst die Tröpfchen stärker.",fb:"Es gibt keinen stärkeren Luftstrom. Schau dir die Ladungen an."},
+ {t:"Lack und Werkstück sind gleichnamig geladen.",fb:"Dann würden sich die Tröpfchen vom Werkstück wegbewegen."}]);
+multi("m4","Welche Vorteile hat das elektrostatische Lackieren? Kreuze alle richtigen an.",[
+ {t:"Es wird weniger Lack verschwendet.",ok:true},{t:"Es ist umweltschonender.",ok:true},{t:"Auch Rückseiten und Kanten werden lackiert.",ok:true},{t:"Es spart Zeit.",ok:true},
+ {t:"Man kann damit auch Holz ohne Weiteres lackieren.",fb:""},{t:"Der Lack trocknet schneller, weil er geladen ist."}],
+ "Deshalb nutzt man es z. B. für Autoteile, Fahrräder und Heizkörper aus Metall.");
+
+/* ---------- Station 5: Gewitter ---------- */
+const c5=setupCanvas($("cv5"),640,340);let run5=false,sep=0,flash=0,ps=[];
+for(let i=0;i<10;i++)ps.push({t:Math.random(),side:0});for(let i=0;i<10;i++)ps.push({t:Math.random(),side:1});
+function cloud(c,col){c.fillStyle=col;[[200,150,70],[270,110,80],[350,100,85],[430,130,75],[470,180,60],[160,200,55],[230,215,70],[320,220,75],[410,215,65]].forEach(([x,y,r])=>{c.beginPath();c.arc(x,y,r,0,7);c.fill();});}
+function step5(){const C={ink:css("ink"),plus:css("plus"),minus:css("minus"),muted:css("muted"),neu:css("neutral")};
+ c5.clearRect(0,0,640,340);cloud(c5,css("line"));
+ c5.strokeStyle=C.ink;c5.lineWidth=2;c5.beginPath();c5.moveTo(40,320);c5.lineTo(600,320);c5.stroke();
+ c5.fillStyle=C.muted;c5.font="12px sans-serif";c5.textAlign="center";c5.fillText("Abwinde",230,165);c5.fillText("Aufwinde",410,165);
+ if(run5){ps.forEach(p=>{p.t=(p.t+0.006)%1;});sep=Math.min(1,sep+0.0035);}
+ ps.forEach(p=>{const y=p.side?260-p.t*170:90+p.t*170,x=p.side?(400+Math.sin(p.t*6)*12):(240+Math.sin(p.t*6)*12);
+  if(p.side){dot(c5,x,y,6,"#7fb3d6");}else{c5.fillStyle="#3b5bd6";c5.font="16px sans-serif";c5.fillText("✱",x,y+5);}});
+ const n=Math.round(sep*7);
+ for(let i=0;i<n;i++){charge(c5,230+i*35,70,8,C.plus,true);charge(c5,220+i*35,262,8,C.minus,false);}
+ if(sep>0.6)for(let i=0;i<Math.round((sep-0.6)*15);i++)charge(c5,200+i*45,332,6,C.plus,true);
+ if(sep>=1&&run5){flash=12;sep=0.15;mark("s5-flash");}
+ if(flash>0){flash--;c5.strokeStyle="#ffd34d";c5.lineWidth=5;c5.beginPath();let x=330,y=262;c5.moveTo(x,y);while(y<320){x+=(Math.random()-.5)*40;y+=12;c5.lineTo(x,Math.min(y,320));}c5.stroke();
+  c5.fillStyle="rgba(255,240,180,.25)";c5.fillRect(0,0,640,340);}
+ $("r5").textContent=!run5?"":flash>0?"Blitz! Entladung zwischen Wolke und Erde.":sep<0.3?"Regentropfen und Eiskristalle reiben aneinander …":"Unten sammelt sich negative, oben positive Ladung.";
+ $("s5").textContent=S.done["s5-flash"]?"":"Warte, bis es blitzt.";}
+$("b5").onclick=()=>{run5=!run5;$("b5").textContent=run5?"Winde anhalten":"Winde starten";};
+sortTask("sort5","Wie werden die Teilchen in der Wolke geladen?",["positiv","negativ"],[
+ {t:"Eiskristalle / Hagelkörner",c:"positiv",fb:"Sie sammeln sich oben in der Wolke."},
+ {t:"Regentropfen",c:"negativ",fb:"Sie sammeln sich unten in der Wolke."},
+ {t:"die Unterseite der Wolke",c:"negativ",fb:"Dort sind die Regentropfen."},
+ {t:"der Erdboden unter der Wolke",c:"positiv",fb:"Er wird von der negativen Wolkenunterseite beeinflusst. In der Simulation siehst du ⊕ am Boden."}]);
+orderTask("ord5","Bringe die Ursachenkette in die richtige Reihenfolge.",[
+ "Warme, feuchte Luft steigt auf, kühlt ab und kondensiert: Wolken entstehen.",
+ "Es gibt starke Aufwinde mit Regentropfen und Abwinde mit Eiskristallen.",
+ "Regentropfen und Eiskristalle reiben aneinander.",
+ "Ladungstrennung: Regentropfen werden negativ, Eiskristalle positiv.",
+ "Blitz: Entladung zwischen geladenen Bereichen."],"Das ist Ladungstrennung durch Reibung, wie beim Luftballon!");
+
+/* ---------- Station 6: Donner ---------- */
+let t6=null,th=0,secs=0,iv=null;
+function draw6(lit){const ink=css("ink");$("storm").innerHTML=`<ellipse cx="80" cy="30" rx="60" ry="22" style="fill:var(--neutral)"/>${lit?`<path d="M80 50 L68 80 L84 80 L72 112" fill="none" stroke="#ffd34d" stroke-width="5"/>`:""}
+ <line x1="0" y1="114" x2="320" y2="114" stroke="${ink}" stroke-width="2"/><rect x="240" y="88" width="30" height="26" style="fill:var(--card)" stroke="${ink}"/><path d="M236 90 L255 74 L274 90" fill="none" stroke="${ink}" stroke-width="2"/>
+ <text x="255" y="66" text-anchor="middle" font-size="13" style="fill:var(--heading);font-family:var(--head);font-weight:600">${secs.toFixed(0)} s</text>`;}
+$("b6").onclick=()=>{if(iv)return;th=[3,6,9,12][Math.floor(Math.random()*4)];secs=0;draw6(true);setTimeout(()=>draw6(false),250);
+ $("r6").textContent="Zähle mit …";iv=setInterval(()=>{secs++;draw6(false);if(secs>=th){clearInterval(iv);iv=null;$("r6").innerHTML=`<b>GRRRUMMMMS!</b> Nach ${th} s kam der Donner. Das Gewitter ist also ${th/3} km entfernt.`;}},reduced?200:1000);};
+draw6(false);
+numTask("n6","Du siehst einen Blitz und hörst den Donner 12 Sekunden später. Wie viele Kilometer ist das Gewitter entfernt?",4,0.01,"km","12 s : 3 s pro km = 4 km.","Teile die Sekunden durch 3.");
+mc("q6","Wie entsteht der Donner?",[
+ {t:"Der Blitz erhitzt die Luft extrem. Sie dehnt sich explosionsartig aus.",ok:true,fb:"Das Grollen entsteht, weil der Schall von verschiedenen Stellen des langen Blitzes unterschiedlich lange braucht."},
+ {t:"Wolken stoßen zusammen.",fb:"Wolken sind keine festen Körper."},
+ {t:"Die Regentropfen platzen.",fb:"Denk an die Hitze im Blitzkanal."}]);
+multi("m6","Wie verhältst du dich bei einem Gewitter im Freien richtig? Kreuze alle richtigen an.",[
+ {t:"Schutz in einem Gebäude oder Auto suchen",ok:true},{t:"aus dem Wasser gehen",ok:true},{t:"einzeln stehende Bäume meiden",ok:true},{t:"in die Hocke gehen, Füße zusammen",ok:true},
+ {t:"unter einen einzelnen hohen Baum stellen"},{t:"auf einen Hügel steigen, um besser zu sehen"},{t:"mit einem Regenschirm über ein freies Feld laufen"}],
+ "Ein Auto schützt wie ein Faradayscher Käfig. Mehr dazu in Elektrostatik IV.");
+
+/* ---------- Station 7: Atom ---------- */
+let arr7=false;
+function draw7(){const or=css("orange"),cx=120,cy=120,R=85;let h=`<circle cx="${cx}" cy="${cy}" r="${R}" style="fill:none;stroke:var(--line)" stroke-width="1.5"/>`;
+ h+=svgCharge(113,114,9,true)+svgCharge(128,127,9,true)+`<circle cx="128" cy="111" r="9" style="fill:var(--neutral)"/><circle cx="112" cy="129" r="9" style="fill:var(--neutral)"/>`;
+ [-2.3,0.85].forEach(a=>{const x=cx+R*Math.cos(a),y=cy+R*Math.sin(a);h+=svgCharge(x.toFixed(1),y.toFixed(1),10,false);
+  if(arr7){const ux=(cx-x)/R,uy=(cy-y)/R,x1=x+ux*16,y1=y+uy*16,x2=x+ux*48,y2=y+uy*48;
+   h+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${or}" stroke-width="4"/><circle cx="${x2}" cy="${y2}" r="5" fill="${or}"/>`;}});
+ $("atom7").innerHTML=h;}
+$("b7").onclick=()=>{arr7=!arr7;draw7();if(arr7)mark("s7-arr");$("b7").textContent=arr7?"Kraftpfeile ausblenden":"Kraftpfeile zeigen";};
+mc("q7","Warum fliegen die Elektronen nicht weg?",[
+ {t:"Kern (positiv) und Elektronen (negativ) ziehen sich an.",ok:true,fb:"Ungleichnamige Ladungen ziehen sich an. Diese Kraft hält das Atom zusammen."},
+ {t:"Die Elektronen sind am Kern festgeklebt.",fb:"Sie werden durch eine elektrische Kraft gehalten."},
+ {t:"Die Elektronen stoßen sich gegenseitig zum Kern hin.",fb:"Die Elektronen stoßen sich zwar ab, aber nach außen. Was zieht sie nach innen?"}]);
+sortTask("sort7","Wird Elektrostatik hier genutzt, oder stört sie?",["nützlich","störend"],[
+ {t:"Laserdrucker und Kopierer",c:"nützlich",fb:"Ladungen bestimmen, wo der Toner haftet."},
+ {t:"Lackieren von Autoteilen",c:"nützlich",fb:"Spart Lack und Zeit."},
+ {t:"Schlag an der Türklinke",c:"störend",fb:"Unangenehm, aber ungefährlich."},
+ {t:"Staub auf dem Fernsehbildschirm",c:"störend",fb:"Der geladene Bildschirm zieht Staub an."},
+ {t:"Funken beim Tanken",c:"störend",fb:"Funken können Benzindämpfe entzünden. Deshalb ist das gefährlich."},
+ {t:"Elektroskop im Physikraum",c:"nützlich",fb:"Damit weist man Ladungen nach."}]);
+
+/* ---------- Station 8 ---------- */
+sortTask("f1","Elektrostatik I: Richtig oder falsch?",["richtig","falsch"],[
+ {t:"Ein neutraler Körper hat überhaupt keine elektrischen Ladungen.",c:"falsch",fb:"Er hat gleich viele positive und negative Ladungen."},
+ {t:"Das Elektron trägt die kleinste negative Ladung.",c:"richtig"},
+ {t:"Ein positiv geladener Körper hat einen Elektronenüberschuss.",c:"falsch",fb:"Positiv heißt Elektronenmangel."},
+ {t:"Beim Reiben gehen Elektronen von einem Körper auf den anderen über.",c:"richtig"},
+ {t:"Zwei negativ geladene Luftballons ziehen sich an.",c:"falsch",fb:"Gleichnamige Ladungen stoßen sich ab."},
+ {t:"Reibt man einen Luftballon an Papier, wird der Ballon negativ.",c:"richtig"}]);
+sortTask("f2","Elektrostatik II: Richtig oder falsch?",["richtig","falsch"],[
+ {t:"Mit dem Elektroskop erkennt man, ob ein Körper positiv oder negativ ist.",c:"falsch",fb:"Der Zeiger schlägt bei beiden Ladungsarten aus."},
+ {t:"Beim Laserdrucker haftet der Toner an den Stellen, die der Laser neutralisiert hat.",c:"richtig"},
+ {t:"Beim elektrostatischen Lackieren werden Lack und Werkstück gleichnamig geladen.",c:"falsch",fb:"Ungleichnamig, sonst würde der Lack abgestoßen."},
+ {t:"Ein Blitz ist eine Entladung zwischen unterschiedlich geladenen Bereichen.",c:"richtig"},
+ {t:"Der Donner entsteht, weil sich die stark erhitzte Luft schnell ausdehnt.",c:"richtig"},
+ {t:"Im Atom stoßen sich Kern und Elektronen ab.",c:"falsch",fb:"Sie ziehen sich an."}]);
+
+/* ---------- Schleife ---------- */
+function onStation(i){if(i===0)$("esk1").innerHTML=eskop(0,true);if(i===1)upd2();if(i===2)draw3();if(i===5)draw6(false);if(i===6)draw7();}
+function loop(){if(S.cur===3)step4();if(S.cur===4)step5();requestAnimationFrame(loop);}
+const mq=matchMedia("(prefers-color-scheme: dark)");const redraw=()=>onStation(S.cur);
+mq.addEventListener&&mq.addEventListener("change",redraw);
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+upd2();draw3();draw7();go(S.cur||0);requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>
